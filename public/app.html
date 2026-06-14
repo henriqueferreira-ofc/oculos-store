@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Óculos Store — Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde-escuro:#4a5a44;
+  --verde-medio:#6B7C64;
+  --verde-claro:#8a9c82;
+  --creme:#f5f2ee;
+  --branco:#ffffff;
+  --borda:#e8e4df;
+  --texto-sec:#9a9590;
+  --texto:#2c2c2a;
+  --amarelo:#d9b449;
+  --roxo:#7c6aa8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',sans-serif;
+  font-weight:400;
+  color:var(--texto);
+  background:var(--creme);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.display{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
+.hidden{display:none !important}
+
+/* ========== LOGIN ========== */
+#login-screen{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,var(--verde-escuro) 0%,var(--verde-medio) 50%,var(--verde-claro) 100%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;z-index:1000;
+}
+.deco-circle{position:absolute;border-radius:50%;background:rgba(255,255,255,0.08);pointer-events:none}
+.deco-circle.c1{width:420px;height:420px;top:-120px;left:-120px}
+.deco-circle.c2{width:520px;height:520px;bottom:-180px;right:-180px;background:rgba(255,255,255,0.06)}
+.login-card{
+  position:relative;z-index:2;
+  background:var(--branco);
+  width:100%;max-width:400px;
+  padding:48px 40px;
+  border-radius:6px;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.3);
+  text-align:center;
+}
+.login-logo{
+  width:64px;height:64px;border-radius:14px;
+  background:var(--verde-medio);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 24px;
+  color:#fff;font-size:38px;line-height:1;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
+}
+.login-card h1{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:36px;color:var(--texto);margin-bottom:6px;
+}
+.login-card .subtitle{
+  text-transform:uppercase;letter-spacing:3px;font-size:11px;
+  color:var(--texto-sec);font-weight:400;margin-bottom:36px;
+}
+.field{text-align:left;margin-bottom:20px}
+.field label{
+  display:block;
+  text-transform:uppercase;letter-spacing:1.5px;font-size:11px;
+  color:var(--texto-sec);font-weight:500;margin-bottom:8px;
+}
+.field input, .field select{
+  width:100%;padding:12px 14px;
+  border:1px solid var(--borda);border-radius:4px;
+  background:var(--branco);
+  transition:border-color .15s;
+}
+.field input:focus, .field select:focus{border-color:var(--verde-medio)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:12px 22px;border-radius:4px;
+  font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;
+  transition:all .15s;
+}
+.btn-primary{background:var(--verde-medio);color:#fff}
+.btn-primary:hover{background:var(--verde-escuro)}
+.btn-ghost{background:transparent;color:var(--texto);border:1px solid var(--borda)}
+.btn-ghost:hover{background:var(--creme)}
+.btn-full{width:100%}
+.error-msg{
+  color:#b14848;font-size:13px;margin-top:-8px;margin-bottom:14px;
+  text-align:left;min-height:18px;
+}
+
+/* ========== TOPBAR ========== */
+#app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{
+  height:60px;background:var(--verde-medio);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;color:#fff;
+  position:sticky;top:0;z-index:50;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-badge{
+  width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,0.18);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:#fff;
+}
+.brand-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:22px}
+.top-actions{display:flex;gap:10px}
+.top-btn{
+  padding:8px 16px;border-radius:4px;
+  border:1px solid rgba(255,255,255,0.35);
+  color:#fff;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:500;
+  transition:background .15s;
+}
+.top-btn:hover{background:rgba(255,255,255,0.2)}
+
+/* ========== LAYOUT ========== */
+.container{max-width:1100px;margin:0 auto;padding:40px 28px;width:100%}
+.page-title{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+  font-size:38px;margin-bottom:6px;color:var(--texto);
+}
+.page-sub{
+  text-transform:uppercase;letter-spacing:2px;font-size:11px;
+  color:var(--texto-sec);margin-bottom:28px;
+}
+
+/* ========== BUSCA ========== */
+.search-bar{
+  background:var(--branco);border:1px solid var(--borda);border-radius:6px;
+  padding:6px 16px;display:flex;align-items:center;gap:10px;margin-bottom:24px;
+}
+.search-bar input{
+  flex:1;border:none;padding:12px 0;font-size:15px;background:transparent;
+}
+.search-icon{color:var(--texto-sec);font-size:16px}
+
+.results{display:grid;gap:12px}
+.os-card{
+  background:var(--branco);border:1px solid var(--borda);border-radius:6px;
+  padding:18px 22px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  transition:all .15s;
+}
+.os-card:hover{border-color:var(--verde-medio);transform:translateY(-1px);box-shadow:0 4px 14px -6px rgba(0,0,0,0.08)}
+.os-card .info{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.os-card .top-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cliente-nome{font-size:16px;font-weight:500;color:var(--texto)}
+.os-badge{
+  display:inline-block;padding:3px 10px;border-radius:3px;
+  background:var(--verde-medio);color:#fff;
+  font-size:11px;letter-spacing:1px;font-weight:500;
+}
+.meta-row{display:flex;gap:18px;color:var(--texto-sec);font-size:13px;flex-wrap:wrap}
+.meta-row span strong{color:var(--texto);font-weight:500}
+.status-badge{
+  padding:5px 12px;border-radius:3px;font-size:11px;
+  text-transform:uppercase;letter-spacing:1px;font-weight:500;white-space:nowrap;
+}
+.status-aberta{background:#f5e9c8;color:#7d5e0e}
+.status-pronta{background:#d9e6d2;color:#3f5436}
+.status-entregue{background:#e2dcef;color:#4d3f72}
+
+.empty-state{
+  text-align:center;padding:80px 20px;color:var(--texto-sec);
+}
+.empty-state .icon{font-size:54px;margin-bottom:14px;opacity:0.6}
+.empty-state h3{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:24px;color:var(--texto);margin-bottom:6px}
+
+/* ========== FORM ========== */
+.form-card{
+  background:var(--branco);border:1px solid var(--borda);border-radius:6px;overflow:hidden;
+}
+.form-header{
+  background:var(--verde-medio);color:#fff;padding:22px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+}
+.form-header .os-num{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:30px;
+}
+.form-body{padding:28px}
+.section{margin-bottom:32px}
+.section-title{
+  text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:600;
+  color:var(--verde-escuro);margin-bottom:14px;
+  padding-bottom:8px;border-bottom:1px solid var(--borda);
+}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:1fr 1fr}
+.grid-3{grid-template-columns:1fr 1fr 1fr}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.col-span-2{grid-column:span 2}
+.col-span-full{grid-column:1/-1}
+@media(max-width:680px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .col-span-2{grid-column:auto}
+}
+
+/* tabela grau */
+.grau-table{width:100%;border-collapse:collapse;border:1px solid var(--borda);border-radius:4px;overflow:hidden}
+.grau-table th{
+  background:var(--verde-medio);color:#fff;
+  font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;
+  padding:10px 8px;text-align:center;
+}
+.grau-table td{border-top:1px solid var(--borda);padding:0;text-align:center}
+.grau-table td.olho-label{
+  font-weight:500;color:var(--verde-escuro);background:var(--creme);
+  padding:10px;width:80px;
+}
+.grau-table input{
+  width:100%;border:none;padding:12px 8px;text-align:center;background:transparent;
+}
+.grau-table .ro{padding:12px 8px;background:var(--creme);color:var(--texto);min-height:20px}
+
+.form-footer{
+  padding:20px 28px;background:var(--creme);
+  display:flex;justify-content:flex-end;gap:10px;
+  border-top:1px solid var(--borda);
+}
+
+/* ========== DETALHE ========== */
+.back-link{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--verde-escuro);font-size:13px;font-weight:500;
+  margin-bottom:18px;padding:6px 0;
+}
+.back-link:hover{color:var(--verde-medio)}
+.detail-card{background:var(--branco);border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.detail-header{
+  background:var(--verde-medio);color:#fff;padding:22px 28px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+}
+.detail-header .left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.detail-header .os-num{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:32px}
+.detail-body{padding:28px}
+.kv-grid{display:grid;gap:14px}
+.kv{display:flex;flex-direction:column;gap:4px}
+.kv .k{text-transform:uppercase;font-size:10px;letter-spacing:1.5px;color:var(--texto-sec);font-weight:500}
+.kv .v{font-size:15px;color:var(--texto);min-height:20px}
+.valor-total-block{
+  display:flex;justify-content:flex-end;align-items:baseline;gap:14px;
+  padding-top:20px;border-top:1px solid var(--borda);margin-top:24px;
+}
+.valor-total-block .label{
+  text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--texto-sec);font-weight:500;
+}
+.valor-total-block .valor{
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;
+  font-size:42px;color:var(--verde-escuro);
+}
+
+.edit-btn{
+  padding:8px 16px;border-radius:4px;background:rgba(255,255,255,0.18);color:#fff;
+  font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:500;
+  border:1px solid rgba(255,255,255,0.3);
+}
+.edit-btn:hover{background:rgba(255,255,255,0.3)}
+
+/* ========== TOAST ========== */
+#toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--verde-escuro);color:#fff;
+  padding:14px 22px;border-radius:4px;
+  box-shadow:0 10px 30px -8px rgba(0,0,0,0.3);
+  font-size:14px;font-weight:500;letter-spacing:.3px;
+  transform:translateY(20px);opacity:0;pointer-events:none;
+  transition:all .25s;z-index:200;
+}
+#toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="deco-circle c1"></div>
+  <div class="deco-circle c2"></div>
+  <div class="login-card">
+    <div class="login-logo">S</div>
+    <h1>Óculos Store</h1>
+    <div class="subtitle">Sistema de Gestão</div>
+    <form id="login-form" autocomplete="off">
+      <div class="field">
+        <label for="senha">Senha de Acesso</label>
+        <input type="password" id="senha" autofocus />
+      </div>
+      <div class="error-msg" id="login-error"></div>
+      <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">S</div>
+      <div class="brand-title">Óculos Store</div>
+    </div>
+    <div class="top-actions">
+      <button class="top-btn" id="btn-buscar">🔍 Buscar OS</button>
+      <button class="top-btn" id="btn-nova">+ Nova OS</button>
+      <button class="top-btn" id="btn-sair">Sair</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- PAINEL BUSCA -->
+    <section id="panel-busca">
+      <h2 class="page-title">Ordens de Serviço</h2>
+      <div class="page-sub">Busque por nome do cliente ou número da OS</div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Digite o nome do cliente ou o número da OS..." />
+      </div>
+      <div class="results" id="results"></div>
+    </section>
+
+    <!-- PAINEL FORM -->
+    <section id="panel-form" class="hidden">
+      <h2 class="page-title" id="form-title">Nova Ordem de Serviço</h2>
+      <div class="page-sub" id="form-sub">Preencha os dados abaixo</div>
+
+      <div class="form-card">
+        <div class="form-header">
+          <div class="os-num" id="form-os-num">OS-0001</div>
+          <div class="status-badge status-aberta" id="form-status-preview">Aberta</div>
+        </div>
+        <div class="form-body">
+          <form id="os-form" autocomplete="off">
+            <div class="section">
+              <div class="section-title">Dados do Cliente</div>
+              <div class="grid grid-3">
+                <div class="field col-span-full"><label>Nome Completo *</label><input type="text" name="nome" required /></div>
+                <div class="field"><label>Telefone</label><input type="text" name="fone" /></div>
+                <div class="field col-span-2"><label>Valor Total (R$)</label><input type="number" step="0.01" name="valorTotal" /></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Produto</div>
+              <div class="grid grid-3">
+                <div class="field col-span-full"><label>Lentes</label><input type="text" name="lentes" /></div>
+                <div class="field"><label>Armação</label><input type="text" name="armacao" /></div>
+                <div class="field"><label>Alt.</label><input type="text" name="alt" /></div>
+                <div class="field"><label>Cor</label><input type="text" name="cor" /></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Grau</div>
+              <table class="grau-table">
+                <thead><tr><th>Olho</th><th>ESF</th><th>CIL</th><th>EIXO</th><th>DP</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="olho-label">OD</td>
+                    <td><input type="text" name="od_esf" /></td>
+                    <td><input type="text" name="od_cil" /></td>
+                    <td><input type="text" name="od_eixo" /></td>
+                    <td><input type="text" name="od_dp" /></td>
+                  </tr>
+                  <tr>
+                    <td class="olho-label">OE</td>
+                    <td><input type="text" name="oe_esf" /></td>
+                    <td><input type="text" name="oe_cil" /></td>
+                    <td><input type="text" name="oe_eixo" /></td>
+                    <td><input type="text" name="oe_dp" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Dados Adicionais</div>
+              <div class="grid grid-2">
+                <div class="field"><label>Adição</label><input type="text" name="adicao" /></div>
+                <div class="field"><label>Status da OS</label>
+                  <select name="status">
+                    <option value="aberta">Aberta</option>
+                    <option value="pronta">Pronta para retirada</option>
+                    <option value="entregue">Entregue</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="form-footer">
+          <button type="button" class="btn btn-ghost" id="btn-cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-save">💾 Salvar OS</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAINEL DETALHE -->
+    <section id="panel-detalhe" class="hidden">
+      <a class="back-link" id="back-to-search">← Voltar para busca</a>
+      <div class="detail-card">
+        <div class="detail-header">
+          <div class="left">
+            <div class="os-num" id="det-os-num">OS-0001</div>
+            <div class="status-badge" id="det-status">Aberta</div>
+          </div>
+          <button class="edit-btn" id="btn-edit">✏️ Editar</button>
+        </div>
+        <div class="detail-body">
+          <div class="section">
+            <div class="section-title">Dados do Cliente</div>
+            <div class="kv-grid grid grid-2">
+              <div class="kv"><div class="k">Nome</div><div class="v" id="det-nome">—</div></div>
+              <div class="kv"><div class="k">Telefone</div><div class="v" id="det-fone">—</div></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">Produto</div>
+            <div class="kv-grid grid grid-3">
+              <div class="kv col-span-full"><div class="k">Lentes</div><div class="v" id="det-lentes">—</div></div>
+              <div class="kv"><div class="k">Armação</div><div class="v" id="det-armacao">—</div></div>
+              <div class="kv"><div class="k">Alt.</div><div class="v" id="det-alt">—</div></div>
+              <div class="kv"><div class="k">Cor</div><div class="v" id="det-cor">—</div></div>
+              <div class="kv"><div class="k">Adição</div><div class="v" id="det-adicao">—</div></div>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">Grau</div>
+            <table class="grau-table">
+              <thead><tr><th>Olho</th><th>ESF</th><th>CIL</th><th>EIXO</th><th>DP</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="olho-label">OD</td>
+                  <td><div class="ro" id="det-od_esf"></div></td>
+                  <td><div class="ro" id="det-od_cil"></div></td>
+                  <td><div class="ro" id="det-od_eixo"></div></td>
+                  <td><div class="ro" id="det-od_dp"></div></td>
+                </tr>
+                <tr>
+                  <td class="olho-label">OE</td>
+                  <td><div class="ro" id="det-oe_esf"></div></td>
+                  <td><div class="ro" id="det-oe_cil"></div></td>
+                  <td><div class="ro" id="det-oe_eixo"></div></td>
+                  <td><div class="ro" id="det-oe_dp"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="valor-total-block">
+            <div class="label">Valor Total</div>
+            <div class="valor" id="det-valor">R$ 0,00</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ DB ============ */
+const DB_KEY = 'otica_store_os';
+function getDB(){
+  try { return JSON.parse(localStorage.getItem(DB_KEY)) || []; }
+  catch(e){ return []; }
+}
+function saveDB(dados){ localStorage.setItem(DB_KEY, JSON.stringify(dados)); }
+function proximoNumOS(){
+  const db = getDB();
+  if(db.length === 0) return 1;
+  return Math.max(...db.map(o => Number(o.numero) || 0)) + 1;
+}
+function formatarOS(num){ return 'OS-' + String(num).padStart(4, '0'); }
+function formatarMoeda(v){
+  const n = Number(v);
+  if(!isFinite(n)) return 'R$ 0,00';
+  return n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+
+/* ============ LOGIN ============ */
+const SENHA = '1234';
+const loginScreen = document.getElementById('login-screen');
+const app = document.getElementById('app');
+document.getElementById('login-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  const senha = document.getElementById('senha').value;
+  const err = document.getElementById('login-error');
+  if(senha === SENHA){
+    err.textContent = '';
+    loginScreen.classList.add('hidden');
+    app.classList.remove('hidden');
+    renderBusca();
+  } else {
+    err.textContent = 'Senha incorreta. Tente novamente.';
+  }
+});
+document.getElementById('btn-sair').addEventListener('click', ()=>{
+  app.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  document.getElementById('senha').value = '';
+  document.getElementById('login-error').textContent = '';
+});
+
+/* ============ NAV ============ */
+const panels = {
+  busca: document.getElementById('panel-busca'),
+  form: document.getElementById('panel-form'),
+  detalhe: document.getElementById('panel-detalhe'),
+};
+function showPanel(name){
+  Object.entries(panels).forEach(([k,el])=>{
+    el.classList.toggle('hidden', k !== name);
+  });
+  window.scrollTo(0,0);
+}
+document.getElementById('btn-buscar').addEventListener('click', ()=>{ renderBusca(); showPanel('busca'); });
+document.getElementById('btn-nova').addEventListener('click', ()=> openForm(null));
+document.getElementById('back-to-search').addEventListener('click', e=>{ e.preventDefault(); renderBusca(); showPanel('busca'); });
+
+/* ============ BUSCA ============ */
+const searchInput = document.getElementById('search-input');
+const resultsEl = document.getElementById('results');
+searchInput.addEventListener('input', renderBusca);
+
+function statusLabel(s){
+  return s==='pronta' ? 'Pronta' : s==='entregue' ? 'Entregue' : 'Aberta';
+}
+function statusClass(s){
+  return s==='pronta' ? 'status-pronta' : s==='entregue' ? 'status-entregue' : 'status-aberta';
+}
+
+function renderBusca(){
+  const db = getDB();
+  const q = (searchInput.value || '').trim().toLowerCase();
+  let list = db;
+  if(q){
+    list = db.filter(o=>{
+      const nome = (o.nome||'').toLowerCase();
+      const num = formatarOS(o.numero).toLowerCase();
+      const numStr = String(o.numero);
+      return nome.includes(q) || num.includes(q) || numStr.includes(q);
+    });
+  }
+  list = list.slice().sort((a,b)=> b.numero - a.numero);
+
+  if(db.length === 0){
+    resultsEl.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">👓</div>
+        <h3>Nenhuma ordem de serviço cadastrada</h3>
+        <p>Clique em "+ Nova OS" no topo para criar a primeira.</p>
+      </div>`;
+    return;
+  }
+  if(list.length === 0){
+    resultsEl.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🔎</div>
+        <h3>Nenhum resultado encontrado</h3>
+        <p>Tente outro nome ou número.</p>
+      </div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = list.map(o => `
+    <div class="os-card" data-num="${o.numero}">
+      <div class="info">
+        <div class="top-row">
+          <span class="cliente-nome">${escapeHtml(o.nome || 'Sem nome')}</span>
+          <span class="os-badge">${formatarOS(o.numero)}</span>
+        </div>
+        <div class="meta-row">
+          <span>📞 <strong>${escapeHtml(o.fone || '—')}</strong></span>
+          <span>💰 <strong>${formatarMoeda(o.valorTotal)}</strong></span>
+        </div>
+      </div>
+      <span class="status-badge ${statusClass(o.status)}">${statusLabel(o.status)}</span>
+    </div>
+  `).join('');
+
+  resultsEl.querySelectorAll('.os-card').forEach(el=>{
+    el.addEventListener('click', ()=> openDetalhe(Number(el.dataset.num)));
+  });
+}
+
+function escapeHtml(str){
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ============ FORM ============ */
+const form = document.getElementById('os-form');
+const formOsNum = document.getElementById('form-os-num');
+const formStatusPreview = document.getElementById('form-status-preview');
+const formTitle = document.getElementById('form-title');
+const formSub = document.getElementById('form-sub');
+let editingNumero = null;
+
+const CAMPOS = ['nome','fone','valorTotal','lentes','armacao','alt','cor',
+  'od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp','adicao','status'];
+
+function openForm(numero){
+  form.reset();
+  editingNumero = numero;
+  if(numero){
+    const o = getDB().find(x=> x.numero === numero);
+    if(!o){ showPanel('busca'); return; }
+    CAMPOS.forEach(c=>{
+      const el = form.elements[c];
+      if(el) el.value = o[c] ?? '';
+    });
+    formOsNum.textContent = formatarOS(o.numero);
+    formTitle.textContent = 'Editar Ordem de Serviço';
+    formSub.textContent = 'Atualize os dados abaixo';
+  } else {
+    const n = proximoNumOS();
+    formOsNum.textContent = formatarOS(n);
+    formTitle.textContent = 'Nova Ordem de Serviço';
+    formSub.textContent = 'Preencha os dados abaixo';
+    form.elements.status.value = 'aberta';
+  }
+  updateStatusPreview();
+  showPanel('form');
+}
+
+form.elements.status.addEventListener('change', updateStatusPreview);
+function updateStatusPreview(){
+  const s = form.elements.status.value;
+  formStatusPreview.className = 'status-badge ' + statusClass(s);
+  formStatusPreview.textContent = statusLabel(s);
+}
+
+document.getElementById('btn-cancel').addEventListener('click', ()=>{
+  renderBusca(); showPanel('busca');
+});
+
+document.getElementById('btn-save').addEventListener('click', ()=>{
+  const nome = form.elements.nome.value.trim();
+  if(!nome){ alert('O nome do cliente é obrigatório.'); form.elements.nome.focus(); return; }
+  const db = getDB();
+  let registro;
+  if(editingNumero){
+    const idx = db.findIndex(x=> x.numero === editingNumero);
+    if(idx === -1){ alert('OS não encontrada.'); return; }
+    registro = db[idx];
+  } else {
+    registro = { numero: proximoNumOS() };
+    db.push(registro);
+  }
+  CAMPOS.forEach(c=>{
+    const el = form.elements[c];
+    if(el) registro[c] = el.value;
+  });
+  saveDB(db);
+  showToast(editingNumero ? 'OS atualizada com sucesso!' : 'OS criada com sucesso!');
+  openDetalhe(registro.numero);
+});
+
+/* ============ DETALHE ============ */
+let detalheNumero = null;
+function openDetalhe(numero){
+  const o = getDB().find(x=> x.numero === numero);
+  if(!o){ showPanel('busca'); return; }
+  detalheNumero = numero;
+  document.getElementById('det-os-num').textContent = formatarOS(o.numero);
+  const stEl = document.getElementById('det-status');
+  stEl.className = 'status-badge ' + statusClass(o.status);
+  stEl.textContent = statusLabel(o.status);
+  document.getElementById('det-nome').textContent = o.nome || '—';
+  document.getElementById('det-fone').textContent = o.fone || '—';
+  document.getElementById('det-lentes').textContent = o.lentes || '—';
+  document.getElementById('det-armacao').textContent = o.armacao || '—';
+  document.getElementById('det-alt').textContent = o.alt || '—';
+  document.getElementById('det-cor').textContent = o.cor || '—';
+  document.getElementById('det-adicao').textContent = o.adicao || '—';
+  ['od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp'].forEach(k=>{
+    document.getElementById('det-'+k).textContent = o[k] || '';
+  });
+  document.getElementById('det-valor').textContent = formatarMoeda(o.valorTotal);
+  showPanel('detalhe');
+}
+document.getElementById('btn-edit').addEventListener('click', ()=> openForm(detalheNumero));
+
+/* ============ TOAST ============ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
