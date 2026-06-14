@@ -4,6 +4,11 @@ import { createHmac, timingSafeEqual } from "crypto";
 const COOKIE_NAME = "app_session";
 const MAX_AGE = 60 * 60 * 8; // 8 hours
 
+function cookieOptions(request: Request, maxAge: number) {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `HttpOnly${secure}; SameSite=Strict; Path=/; Max-Age=${maxAge}`;
+}
+
 function sign(payload: string, secret: string) {
   return createHmac("sha256", secret).update(payload).digest("hex");
 }
@@ -71,7 +76,7 @@ export const Route = createFileRoute("/api/public/auth")({
           const headers = new Headers();
           headers.append(
             "Set-Cookie",
-            `${COOKIE_NAME}=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`,
+            `${COOKIE_NAME}=; ${cookieOptions(request, 0)}`,
           );
           headers.set("Content-Type", "application/json");
           return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
@@ -90,7 +95,7 @@ export const Route = createFileRoute("/api/public/auth")({
         const headers = new Headers();
         headers.append(
           "Set-Cookie",
-          `${COOKIE_NAME}=${token}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${MAX_AGE}`,
+          `${COOKIE_NAME}=${token}; ${cookieOptions(request, MAX_AGE)}`,
         );
         headers.set("Content-Type", "application/json");
         headers.set("Cache-Control", "no-store");
