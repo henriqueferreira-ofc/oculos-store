@@ -483,6 +483,8 @@ function formatarMoeda(v){
 /* ============ LOGIN (validado no servidor) ============ */
 const loginScreen = document.getElementById('login-screen');
 const app = document.getElementById('app');
+const STATIC_PASSWORD = '1234';
+const STATIC_AUTH_KEY = 'oculos_store_auth';
 
 function mostrarApp(){
   loginScreen.classList.add('hidden');
@@ -497,12 +499,25 @@ function mostrarLogin(){
 }
 
 (async function verificarSessao(){
+  if(sessionStorage.getItem(STATIC_AUTH_KEY) === '1'){
+    mostrarApp();
+    return;
+  }
   try {
     const r = await fetch('/api/public/auth', { credentials: 'same-origin' });
     const data = await r.json();
     if(data && data.authenticated) mostrarApp();
   } catch(_){}
 })();
+
+function tentarLoginEstatico(senha){
+  if(senha === STATIC_PASSWORD){
+    sessionStorage.setItem(STATIC_AUTH_KEY, '1');
+    mostrarApp();
+    return true;
+  }
+  return false;
+}
 
 document.getElementById('login-form').addEventListener('submit', async e=>{
   e.preventDefault();
@@ -520,13 +535,16 @@ document.getElementById('login-form').addEventListener('submit', async e=>{
       mostrarApp();
     } else {
       const data = await r.json().catch(()=>({}));
+      if(r.status === 404 && tentarLoginEstatico(senha)) return;
       err.textContent = data.error || 'Senha incorreta. Tente novamente.';
     }
   } catch(_){
-    err.textContent = 'Erro de conexão. Tente novamente.';
+    if(tentarLoginEstatico(senha)) return;
+    err.textContent = 'Senha incorreta. Tente novamente.';
   }
 });
 document.getElementById('btn-sair').addEventListener('click', async ()=>{
+  sessionStorage.removeItem(STATIC_AUTH_KEY);
   try {
     await fetch('/api/public/auth', {
       method: 'POST',
