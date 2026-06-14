@@ -477,28 +477,62 @@ function formatarMoeda(v){
   return n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
 }
 
-/* ============ LOGIN ============ */
-const SENHA = '1234';
+/* ============ LOGIN (validado no servidor) ============ */
 const loginScreen = document.getElementById('login-screen');
 const app = document.getElementById('app');
-document.getElementById('login-form').addEventListener('submit', e=>{
+
+function mostrarApp(){
+  loginScreen.classList.add('hidden');
+  app.classList.remove('hidden');
+  renderBusca();
+}
+function mostrarLogin(){
+  app.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  const s = document.getElementById('senha'); if(s) s.value = '';
+  const e = document.getElementById('login-error'); if(e) e.textContent = '';
+}
+
+(async function verificarSessao(){
+  try {
+    const r = await fetch('/api/public/auth', { credentials: 'same-origin' });
+    const data = await r.json();
+    if(data && data.authenticated) mostrarApp();
+  } catch(_){}
+})();
+
+document.getElementById('login-form').addEventListener('submit', async e=>{
   e.preventDefault();
   const senha = document.getElementById('senha').value;
   const err = document.getElementById('login-error');
-  if(senha === SENHA){
-    err.textContent = '';
-    loginScreen.classList.add('hidden');
-    app.classList.remove('hidden');
-    renderBusca();
-  } else {
-    err.textContent = 'Senha incorreta. Tente novamente.';
+  err.textContent = '';
+  try {
+    const r = await fetch('/api/public/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ password: senha }),
+    });
+    if(r.ok){
+      mostrarApp();
+    } else {
+      const data = await r.json().catch(()=>({}));
+      err.textContent = data.error || 'Senha incorreta. Tente novamente.';
+    }
+  } catch(_){
+    err.textContent = 'Erro de conexão. Tente novamente.';
   }
 });
-document.getElementById('btn-sair').addEventListener('click', ()=>{
-  app.classList.add('hidden');
-  loginScreen.classList.remove('hidden');
-  document.getElementById('senha').value = '';
-  document.getElementById('login-error').textContent = '';
+document.getElementById('btn-sair').addEventListener('click', async ()=>{
+  try {
+    await fetch('/api/public/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ action: 'logout' }),
+    });
+  } catch(_){}
+  mostrarLogin();
 });
 
 /* ============ NAV ============ */
