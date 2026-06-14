@@ -1,0 +1,25 @@
+{
+  "name": "Óculos Store - Sistema de Gestão",
+  "short_name": "Óculos Store",
+  "description": "Sistema de gestão de ordens de serviço da Óculos Store.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f2ee",
+  "theme_color": "#6B7C64",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "oculos-store-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
