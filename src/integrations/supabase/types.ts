@@ -14,7 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ordens_servico: {
+        Row: {
+          adicao: string | null
+          alt: string | null
+          armacao: string | null
+          cor: string | null
+          created_at: string
+          fone: string | null
+          id: string
+          lentes: string | null
+          nome: string
+          numero: number
+          od_cil: string | null
+          od_dp: string | null
+          od_eixo: string | null
+          od_esf: string | null
+          oe_cil: string | null
+          oe_dp: string | null
+          oe_eixo: string | null
+          oe_esf: string | null
+          status: string
+          updated_at: string
+          valor_total: number | null
+        }
+        Insert: {
+          adicao?: string | null
+          alt?: string | null
+          armacao?: string | null
+          cor?: string | null
+          created_at?: string
+          fone?: string | null
+          id?: string
+          lentes?: string | null
+          nome: string
+          numero?: number
+          od_cil?: string | null
+          od_dp?: string | null
+          od_eixo?: string | null
+          od_esf?: string | null
+          oe_cil?: string | null
+          oe_dp?: string | null
+          oe_eixo?: string | null
+          oe_esf?: string | null
+          status?: string
+          updated_at?: string
+          valor_total?: number | null
+        }
+        Update: {
+          adicao?: string | null
+          alt?: string | null
+          armacao?: string | null
+          cor?: string | null
+          created_at?: string
+          fone?: string | null
+          id?: string
+          lentes?: string | null
+          nome?: string
+          numero?: number
+          od_cil?: string | null
+          od_dp?: string | null
+          od_eixo?: string | null
+          od_esf?: string | null
+          oe_cil?: string | null
+          oe_dp?: string | null
+          oe_eixo?: string | null
+          oe_esf?: string | null
+          status?: string
+          updated_at?: string
+          valor_total?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
