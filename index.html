@@ -906,9 +906,12 @@ function lerLegado(){
   catch(_) { return []; }
 }
 function verificarMigracao(){
-  if(localStorage.getItem(LEGACY_DB_KEY + '_migrated') === '1'){ migBanner.classList.add('hidden'); return; }
   const legacy = lerLegado();
   if(!legacy.length){ migBanner.classList.add('hidden'); return; }
+  if(localStorage.getItem(LEGACY_DB_KEY + '_migrated') === '1'){
+    if(cacheOS.length > 0){ migBanner.classList.add('hidden'); return; }
+    localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
+  }
   migCount.textContent = legacy.length;
   migBanner.classList.remove('hidden');
 }
@@ -920,15 +923,25 @@ btnMigDo.addEventListener('click', async ()=>{
   btnMigDo.disabled = true; btnMigSkip.disabled = true;
   btnMigDo.textContent = 'Migrando…';
   const legacy = lerLegado();
-  let ok = 0, fail = 0;
+  let ok = 0;
+  const errors = [];
   for(const o of legacy){
     const { error } = await supabase.from('ordens_servico').insert(toDb(o));
-    if(error) fail++; else ok++;
+    if(error) errors.push(error.message || 'erro desconhecido');
+    else ok++;
   }
-  localStorage.setItem(LEGACY_DB_KEY + '_migrated', '1');
-  migBanner.classList.add('hidden');
-  showToast(`Migração concluída: ${ok} OK${fail?`, ${fail} falharam`:''}.`, fail>0);
   await carregarOS();
+  if(errors.length === 0){
+    localStorage.setItem(LEGACY_DB_KEY + '_migrated', '1');
+    migBanner.classList.add('hidden');
+    showToast(`Migração concluída: ${ok} cadastro${ok === 1 ? '' : 's'} salvo${ok === 1 ? '' : 's'} no banco.`);
+  } else {
+    localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
+    migBanner.classList.remove('hidden');
+    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam. ${errors[0]}`, true);
+  }
+  btnMigDo.disabled = false; btnMigSkip.disabled = false;
+  btnMigDo.textContent = 'Migrar agora';
 });
 
 /* ============ SW ============ */

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oculos-store-v2';
+const CACHE_NAME = 'oculos-store-v3';
 const ASSETS = [
   './',
   './index.html',
