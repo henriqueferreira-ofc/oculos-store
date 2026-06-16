@@ -952,10 +952,30 @@ btnMigDo.addEventListener('click', async ()=>{
   const legacy = lerLegado();
   let ok = 0;
   const errors = [];
-  for(const o of legacy){
-    const { error } = await supabase.from('ordens_servico').insert(toDb(o));
-    if(error) errors.push(error.message || 'erro desconhecido');
-    else ok++;
+  for(let i=0; i<legacy.length; i++){
+    const o = legacy[i] || {};
+    // tolerância a variações de chave do localStorage antigo
+    const norm = {
+      nome: o.nome || o.cliente || o.client || `Cliente ${i+1}`,
+      fone: o.fone || o.telefone || o.phone || '',
+      valorTotal: o.valorTotal ?? o.valor_total ?? o.valor ?? '',
+      lentes: o.lentes || o.lente || '',
+      armacao: o.armacao || o['armação'] || o.armaco || '',
+      alt: o.alt || o.altura || '',
+      cor: o.cor || '',
+      od_esf: o.od_esf || '', od_cil: o.od_cil || '', od_eixo: o.od_eixo || '', od_dp: o.od_dp || '',
+      oe_esf: o.oe_esf || '', oe_cil: o.oe_cil || '', oe_eixo: o.oe_eixo || '', oe_dp: o.oe_dp || '',
+      adicao: o.adicao || o['adição'] || '',
+      status: o.status || 'aberta',
+    };
+    // garante número válido em valor_total
+    const payload = toDb(norm);
+    if(payload.valor_total != null && !isFinite(payload.valor_total)) payload.valor_total = null;
+    const { error } = await supabase.from('ordens_servico').insert(payload);
+    if(error){
+      errors.push(`#${i+1} ${norm.nome}: ${error.message || error.code || 'erro'}`);
+      console.error('Migração falhou no item', i+1, norm, error);
+    } else ok++;
   }
   await carregarOS();
   if(errors.length === 0){
@@ -965,7 +985,8 @@ btnMigDo.addEventListener('click', async ()=>{
   } else {
     localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
     migBanner.classList.remove('hidden');
-    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam. ${errors[0]}`, true);
+    const detalhe = errors.slice(0,2).join(' | ');
+    showToast(`Migração: ${ok} OK, ${errors.length} falharam. ${detalhe}`, true);
   }
   btnMigDo.disabled = false; btnMigSkip.disabled = false;
   btnMigDo.textContent = 'Migrar agora';
