@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title>Óculos Store Mark</title>
+  <circle cx="256" cy="256" r="206" fill="none" stroke="#ffffff" stroke-width="12"/>
+  <path
+    d="M350 110
+       C319 74 242 72 219 118
+       C198 160 242 184 307 207
+       C387 235 411 282 376 328
+       C337 380 217 378 190 304
+       C171 250 217 208 265 223
+       C300 234 314 260 316 282
+       M315 282
+       C299 247 270 230 236 241
+       C187 258 179 331 235 363
+       C287 393 369 374 389 318
+       M389 318
+       C394 421 272 459 188 422
+       C106 386 98 279 166 220
+       C220 174 296 184 357 214"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
