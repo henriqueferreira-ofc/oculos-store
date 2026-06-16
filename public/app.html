@@ -326,10 +326,28 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .valor-total-block .valor{font-size:34px}
   .sheet-footer{flex-direction:column-reverse}
   .sheet-footer .btn{width:100%}
-  #login-screen{padding:18px}
-  .login-card{padding:36px 26px}
-  .login-card h1{font-size:42px}
-  .login-logo{width:78px;height:78px;margin-bottom:16px}
+}
+
+/* Mobile: compact login fixed in viewport (no scroll) */
+@media(max-width:640px){
+  #login-screen{padding:14px;align-items:center;overflow:hidden}
+  .deco-circle.c1{width:260px;height:260px;top:-80px;left:-80px}
+  .deco-circle.c2{width:320px;height:320px;bottom:-120px;right:-120px}
+  .login-card{
+    width:min(100%,340px);padding:22px 22px;border-radius:12px;
+    max-height:calc(100dvh - 28px);
+  }
+  .login-logo{width:58px;height:58px;border-radius:14px;margin-bottom:10px}
+  .login-card h1{font-size:32px;margin-bottom:2px}
+  .login-card .subtitle{font-size:10px;letter-spacing:2px;margin-bottom:16px}
+  .field{margin-bottom:10px}
+  .field:last-of-type{margin-bottom:12px}
+  .field label{font-size:10px;margin-bottom:5px;letter-spacing:1px}
+  .field input{padding:11px 12px;font-size:14px}
+  .btn{padding:11px 18px}
+  .login-card .mode-hint{font-size:11px;margin-top:10px}
+  .error-msg{font-size:12px;min-height:14px;margin-bottom:8px}
+  .info-msg{font-size:12px;padding:8px 10px;margin-bottom:10px}
 }
 
 @media(max-width:480px){
@@ -345,9 +363,6 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .status-badge{padding:4px 10px;font-size:11px}
   .os-badge{padding:5px 12px;font-size:11px}
   .field input, .field select{padding:12px}
-  .login-card{padding:30px 22px}
-  .login-card h1{font-size:38px}
-  .login-logo{width:72px;height:72px;border-radius:16px}
   #toast{left:14px;right:14px;bottom:14px;text-align:center}
   .valor-total-block .valor{font-size:30px}
 }
@@ -356,6 +371,18 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .brand-title{font-size:20px}
   .top-btn{padding:7px 8px;font-size:11px;gap:4px}
   .brand-logo{width:30px;height:30px}
+  .login-card{padding:18px 18px}
+  .login-card h1{font-size:28px}
+  .login-logo{width:52px;height:52px}
+}
+
+/* Short viewports: tighten further so login fits without scroll */
+@media(max-height:680px) and (max-width:640px){
+  .login-card{padding:18px 20px}
+  .login-logo{width:48px;height:48px;margin-bottom:6px;border-radius:12px}
+  .login-card h1{font-size:26px}
+  .login-card .subtitle{margin-bottom:10px}
+  .field{margin-bottom:8px}
 }
 </style>
 </head>
@@ -925,10 +952,30 @@ btnMigDo.addEventListener('click', async ()=>{
   const legacy = lerLegado();
   let ok = 0;
   const errors = [];
-  for(const o of legacy){
-    const { error } = await supabase.from('ordens_servico').insert(toDb(o));
-    if(error) errors.push(error.message || 'erro desconhecido');
-    else ok++;
+  for(let i=0; i<legacy.length; i++){
+    const o = legacy[i] || {};
+    // tolerância a variações de chave do localStorage antigo
+    const norm = {
+      nome: o.nome || o.cliente || o.client || `Cliente ${i+1}`,
+      fone: o.fone || o.telefone || o.phone || '',
+      valorTotal: o.valorTotal ?? o.valor_total ?? o.valor ?? '',
+      lentes: o.lentes || o.lente || '',
+      armacao: o.armacao || o['armação'] || o.armaco || '',
+      alt: o.alt || o.altura || '',
+      cor: o.cor || '',
+      od_esf: o.od_esf || '', od_cil: o.od_cil || '', od_eixo: o.od_eixo || '', od_dp: o.od_dp || '',
+      oe_esf: o.oe_esf || '', oe_cil: o.oe_cil || '', oe_eixo: o.oe_eixo || '', oe_dp: o.oe_dp || '',
+      adicao: o.adicao || o['adição'] || '',
+      status: o.status || 'aberta',
+    };
+    // garante número válido em valor_total
+    const payload = toDb(norm);
+    if(payload.valor_total != null && !isFinite(payload.valor_total)) payload.valor_total = null;
+    const { error } = await supabase.from('ordens_servico').insert(payload);
+    if(error){
+      errors.push(`#${i+1} ${norm.nome}: ${error.message || error.code || 'erro'}`);
+      console.error('Migração falhou no item', i+1, norm, error);
+    } else ok++;
   }
   await carregarOS();
   if(errors.length === 0){
@@ -938,7 +985,8 @@ btnMigDo.addEventListener('click', async ()=>{
   } else {
     localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
     migBanner.classList.remove('hidden');
-    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam. ${errors[0]}`, true);
+    const detalhe = errors.slice(0,2).join(' | ');
+    showToast(`Migração: ${ok} OK, ${errors.length} falharam. ${detalhe}`, true);
   }
   btnMigDo.disabled = false; btnMigSkip.disabled = false;
   btnMigDo.textContent = 'Migrar agora';
