@@ -980,6 +980,7 @@ btnMigDo.addEventListener('click', async ()=>{
   await carregarOS();
   if(errors.length === 0){
     localStorage.setItem(LEGACY_DB_KEY + '_migrated', '1');
+    localStorage.removeItem(LEGACY_DB_KEY);
     migBanner.classList.add('hidden');
     showToast(`Migração concluída: ${ok} cadastro${ok === 1 ? '' : 's'} salvo${ok === 1 ? '' : 's'} no banco.`);
   } else {
