@@ -934,15 +934,15 @@ function lerLegado(){
 }
 function verificarMigracao(){
   const legacy = lerLegado();
-  if(!legacy.length){ migBanner.classList.add('hidden'); return; }
-  if(localStorage.getItem(LEGACY_DB_KEY + '_migrated') === '1'){
-    if(cacheOS.length > 0){ migBanner.classList.add('hidden'); return; }
-    localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
-  }
+  const dismissed = localStorage.getItem(LEGACY_DB_KEY + '_migrated') === '1';
+  if(!legacy.length || dismissed){ migBanner.classList.add('hidden'); return; }
   migCount.textContent = legacy.length;
   migBanner.classList.remove('hidden');
 }
 btnMigSkip.addEventListener('click', ()=>{
+  if(confirm('Descartar os dados antigos do navegador? Os cadastros já no banco continuam intactos.')){
+    localStorage.removeItem(LEGACY_DB_KEY);
+  }
   localStorage.setItem(LEGACY_DB_KEY + '_migrated', '1');
   migBanner.classList.add('hidden');
 });
