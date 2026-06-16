@@ -1,0 +1,2 @@
+ALTER TABLE public.ordens_servico
+  ADD COLUMN IF NOT EXISTS entrada NUMERIC(12,2);

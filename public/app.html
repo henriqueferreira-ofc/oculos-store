@@ -276,9 +276,10 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   padding:11px 14px;display:flex;align-items:center;word-break:break-word;
 }
 .valor-total-block{
-  display:flex;justify-content:flex-end;align-items:baseline;gap:14px;
+  display:flex;justify-content:flex-end;align-items:flex-end;gap:28px;flex-wrap:wrap;
   padding-top:18px;border-top:1px solid var(--borda);margin-top:20px;
 }
+.money-kv{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .valor-total-block .label{
   text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--texto-sec);font-weight:500;
 }
@@ -339,7 +340,8 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .grid-2,.grid-3{grid-template-columns:1fr}
   .grau-table th, .grau-table td{padding:8px 5px;font-size:12px}
   .grau-table td.olho-label{width:64px;font-size:13px}
-  .valor-total-block{align-items:flex-start;flex-direction:column;gap:4px}
+  .valor-total-block{align-items:flex-start;flex-direction:column;gap:14px}
+  .money-kv{align-items:flex-start}
   .valor-total-block .valor{font-size:34px}
   .sheet-footer{flex-direction:column-reverse}
   .sheet-footer .btn{width:100%}
@@ -510,8 +512,9 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <div class="section-title">Dados do Cliente</div>
             <div class="grid">
               <div class="field"><label>Nome Completo *</label><input type="text" name="nome" placeholder="Nome do cliente" required /></div>
-              <div class="grid grid-2">
+              <div class="grid grid-3">
                 <div class="field"><label>Telefone</label><input type="text" name="fone" placeholder="(00) 00000-0000" /></div>
+                <div class="field"><label>Entrada (R$)</label><input type="number" step="0.01" name="entrada" placeholder="0,00" /></div>
                 <div class="field"><label>Valor Total (R$)</label><input type="number" step="0.01" name="valorTotal" placeholder="0,00" /></div>
               </div>
             </div>
@@ -627,8 +630,14 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
           </table>
         </div>
         <div class="valor-total-block">
-          <div class="label">Valor Total</div>
-          <div class="valor" id="det-valor">R$ 0,00</div>
+          <div class="money-kv">
+            <div class="label">Entrada</div>
+            <div class="valor" id="det-entrada">R$ 0,00</div>
+          </div>
+          <div class="money-kv">
+            <div class="label">Valor Total</div>
+            <div class="valor" id="det-valor">R$ 0,00</div>
+          </div>
         </div>
       </div>
     </section>
@@ -648,7 +657,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 const LEGACY_DB_KEY = 'otica_store_os';
-const CAMPOS = ['nome','fone','valorTotal','lentes','armacao','alt','cor',
+const CAMPOS = ['nome','fone','entrada','valorTotal','lentes','armacao','alt','cor',
   'od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp','adicao','status'];
 
 /* ============ HELPERS ============ */
@@ -669,6 +678,7 @@ function toDb(o){
   return {
     nome: o.nome || null,
     fone: o.fone || null,
+    entrada: o.entrada === '' || o.entrada == null ? null : Number(o.entrada),
     valor_total: o.valorTotal === '' || o.valorTotal == null ? null : Number(o.valorTotal),
     lentes: o.lentes || null,
     armacao: o.armacao || null,
@@ -684,6 +694,7 @@ function fromDb(r){
   return {
     id: r.id, numero: r.numero,
     nome: r.nome ?? '', fone: r.fone ?? '',
+    entrada: r.entrada ?? '',
     valorTotal: r.valor_total ?? '',
     lentes: r.lentes ?? '', armacao: r.armacao ?? '', alt: r.alt ?? '', cor: r.cor ?? '',
     od_esf: r.od_esf ?? '', od_cil: r.od_cil ?? '', od_eixo: r.od_eixo ?? '', od_dp: r.od_dp ?? '',
@@ -963,6 +974,7 @@ function openDetalhe(numero){
   ['od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp'].forEach(k=>{
     document.getElementById('det-'+k).textContent = o[k] || '';
   });
+  document.getElementById('det-entrada').textContent = formatarMoeda(o.entrada);
   document.getElementById('det-valor').textContent = formatarMoeda(o.valorTotal);
   document.getElementById('btn-edit').onclick = ()=> openForm(o.numero);
   showPanel('detalhe');

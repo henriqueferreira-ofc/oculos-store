@@ -6,6 +6,7 @@ CREATE TABLE public.ordens_servico (
   numero INTEGER NOT NULL UNIQUE DEFAULT nextval('public.ordens_servico_numero_seq'),
   nome TEXT NOT NULL,
   fone TEXT,
+  entrada NUMERIC(12,2),
   valor_total NUMERIC(12,2),
   lentes TEXT,
   armacao TEXT,
