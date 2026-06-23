@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oculos-store-v3';
+const CACHE_NAME = 'oculos-store-v4';
 const ASSETS = [
   './',
   './app.html',
