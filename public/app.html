@@ -1237,7 +1237,243 @@ btnMigDo.addEventListener('click', async ()=>{
   btnMigDo.textContent = 'Migrar agora';
 });
 
+/* ============ FINANCEIRO ============ */
+const finPeriod = document.getElementById('fin-period');
+const finYearSel = document.getElementById('fin-year');
+const finMonthSel = document.getElementById('fin-month');
+const finSemSel = document.getElementById('fin-semester');
+const finYearWrap = document.getElementById('fin-year-wrap');
+const finMonthWrap = document.getElementById('fin-month-wrap');
+const finSemWrap = document.getElementById('fin-semester-wrap');
+
+function popularAnos(){
+  const anos = new Set([new Date().getFullYear()]);
+  cacheOS.forEach(o => { if(o.created_at) anos.add(new Date(o.created_at).getFullYear()); });
+  const arr = Array.from(anos).sort((a,b)=> b-a);
+  finYearSel.innerHTML = arr.map(a=> `<option value="${a}">${a}</option>`).join('');
+}
+
+function abrirFinanceiro(){
+  popularAnos();
+  const now = new Date();
+  finMonthSel.value = String(now.getMonth());
+  finSemSel.value = now.getMonth() < 6 ? '1' : '2';
+  renderFinanceiro();
+  showPanel('financeiro');
+}
+
+function atualizarVisFiltros(){
+  const p = finPeriod.value;
+  finYearWrap.classList.toggle('hidden', p === 'all');
+  finMonthWrap.classList.toggle('hidden', p !== 'month');
+  finSemWrap.classList.toggle('hidden', p !== 'semester');
+}
+
+[finPeriod, finYearSel, finMonthSel, finSemSel].forEach(el =>
+  el.addEventListener('change', ()=>{ atualizarVisFiltros(); renderFinanceiro(); })
+);
+
+function filtrarPorPeriodo(){
+  const p = finPeriod.value;
+  if(p === 'all') return cacheOS.slice();
+  const ano = Number(finYearSel.value);
+  return cacheOS.filter(o => {
+    if(!o.created_at) return false;
+    const d = new Date(o.created_at);
+    if(d.getFullYear() !== ano) return false;
+    if(p === 'month') return d.getMonth() === Number(finMonthSel.value);
+    if(p === 'semester'){
+      const s = Number(finSemSel.value);
+      return s === 1 ? d.getMonth() < 6 : d.getMonth() >= 6;
+    }
+    return true; // year
+  });
+}
+
+function renderFinanceiro(){
+  const lista = filtrarPorPeriodo();
+  const totalBruto = lista.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
+  const totalEntrada = lista.reduce((s,o)=> s + (Number(o.entrada)||0), 0);
+  const saldo = totalBruto - totalEntrada;
+  const entregues = lista.filter(o=> o.status === 'entregue');
+  const totalEntregue = entregues.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
+  const ticket = lista.length ? totalBruto / lista.length : 0;
+
+  let periodoLabel;
+  const p = finPeriod.value;
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  if(p === 'all') periodoLabel = 'Todos os períodos';
+  else if(p === 'month') periodoLabel = `${meses[Number(finMonthSel.value)]} / ${finYearSel.value}`;
+  else if(p === 'semester') periodoLabel = `${finSemSel.value}º semestre / ${finYearSel.value}`;
+  else periodoLabel = `Ano ${finYearSel.value}`;
+
+  document.getElementById('fin-cards').innerHTML = `
+    <div class="fin-card accent">
+      <div class="label">Faturamento total</div>
+      <div class="value">${formatarMoeda(totalBruto)}</div>
+      <div class="sub">${periodoLabel} · ${lista.length} OS</div>
+    </div>
+    <div class="fin-card">
+      <div class="label">Entradas recebidas</div>
+      <div class="value">${formatarMoeda(totalEntrada)}</div>
+      <div class="sub">Sinal/pagamentos iniciais</div>
+    </div>
+    <div class="fin-card">
+      <div class="label">Saldo a receber</div>
+      <div class="value">${formatarMoeda(saldo)}</div>
+      <div class="sub">Valor total − entradas</div>
+    </div>
+    <div class="fin-card">
+      <div class="label">OS entregues</div>
+      <div class="value">${formatarMoeda(totalEntregue)}</div>
+      <div class="sub">${entregues.length} de ${lista.length} OS</div>
+    </div>
+    <div class="fin-card">
+      <div class="label">Ticket médio</div>
+      <div class="value">${formatarMoeda(ticket)}</div>
+      <div class="sub">Por ordem de serviço</div>
+    </div>
+  `;
+
+  const tbody = document.getElementById('fin-tbody');
+  if(!lista.length){
+    tbody.innerHTML = `<tr><td colspan="6" class="fin-empty">Nenhuma OS encontrada no período selecionado.</td></tr>`;
+    return;
+  }
+  const ordenadas = lista.slice().sort((a,b)=>{
+    const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return db - da;
+  });
+  tbody.innerHTML = ordenadas.map(o => {
+    const data = o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—';
+    return `<tr>
+      <td><strong>${formatarOS(o.numero)}</strong></td>
+      <td>${escapeHtml(o.nome || '—')}</td>
+      <td>${data}</td>
+      <td><span class="status-badge ${statusClass(o.status)}">${statusLabel(o.status)}</span></td>
+      <td class="r">${formatarMoeda(o.entrada)}</td>
+      <td class="r"><strong>${formatarMoeda(o.valorTotal)}</strong></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ============ CONFIGURAÇÕES ============ */
+let currentUserRole = null;
+let currentUserData = null;
+
+async function carregarPerfilUsuario(){
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData?.session?.user;
+  if(!user){ currentUserData = null; currentUserRole = null; return; }
+  currentUserData = user;
+  const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+  if(roles && roles.some(r => r.role === 'admin')) currentUserRole = 'admin';
+  else if(roles && roles.length) currentUserRole = roles[0].role;
+  else currentUserRole = 'user';
+}
+
+async function abrirConfig(){
+  await carregarPerfilUsuario();
+  if(!currentUserData){ mostrarLogin(); return; }
+  document.getElementById('cfg-email').textContent = currentUserData.email || '—';
+  document.getElementById('cfg-uid').textContent = currentUserData.id;
+  const pill = document.getElementById('cfg-role');
+  pill.textContent = currentUserRole === 'admin' ? 'Administrador' : 'Usuário';
+  pill.classList.toggle('admin', currentUserRole === 'admin');
+  renderAdminSection();
+  showPanel('config');
+}
+
+document.getElementById('cfg-logout').addEventListener('click', async ()=>{
+  await supabase.auth.signOut();
+  mostrarLogin();
+});
+
+async function renderAdminSection(){
+  const box = document.getElementById('cfg-admin-content');
+  if(currentUserRole !== 'admin'){
+    box.innerHTML = `<div class="admin-only-msg">Apenas administradores podem gerenciar usuários.<br>Seu perfil atual: <strong>${escapeHtml(currentUserRole || 'usuário')}</strong>.</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="admin-only-msg">Carregando usuários…</div>`;
+  const { data: roles, error } = await supabase.from('user_roles').select('user_id, role, created_at').order('created_at', { ascending: true });
+  if(error){
+    box.innerHTML = `<div class="admin-only-msg">Erro: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  const grouped = {};
+  (roles||[]).forEach(r => { (grouped[r.user_id] = grouped[r.user_id] || []).push(r.role); });
+  const linhas = Object.entries(grouped).map(([uid, papeis]) => {
+    const isAdmin = papeis.includes('admin');
+    const isMe = currentUserData && uid === currentUserData.id;
+    return `<div class="user-list-item">
+      <div>
+        <div><strong>${isMe ? 'Você' : 'Usuário'}</strong> ${papeis.map(p => `<span class="role-pill ${p==='admin'?'admin':''}">${p}</span>`).join(' ')}</div>
+        <div class="uid">${escapeHtml(uid)}</div>
+      </div>
+      ${isMe ? '' : `<button class="btn btn-ghost" data-toggle-admin="${escapeHtml(uid)}" data-is-admin="${isAdmin?'1':'0'}" style="padding:7px 12px;font-size:12px">${isAdmin ? 'Remover admin' : 'Tornar admin'}</button>`}
+    </div>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="user-list">${linhas || '<div class="admin-only-msg">Nenhum usuário cadastrado.</div>'}</div>
+    <div style="margin-top:18px">
+      <div style="font-size:12px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Adicionar perfil a um usuário</div>
+      <div class="inline-form">
+        <input id="cfg-new-uid" type="text" placeholder="ID do usuário (UUID)" />
+        <select id="cfg-new-role">
+          <option value="user">Usuário</option>
+          <option value="admin">Administrador</option>
+        </select>
+        <button class="btn btn-primary" id="cfg-add-role" style="padding:10px 18px">Adicionar</button>
+      </div>
+      <div style="font-size:12px;color:var(--texto-sec);margin-top:8px">Peça ao usuário para abrir Configurações e copiar o ID dele.</div>
+    </div>
+  `;
+  box.querySelectorAll('[data-toggle-admin]').forEach(btn => {
+    btn.addEventListener('click', async ()=>{
+      const uid = btn.dataset.toggleAdmin;
+      const isAdmin = btn.dataset.isAdmin === '1';
+      btn.disabled = true;
+      try {
+        if(isAdmin){
+          const { error } = await supabase.from('user_roles').delete().eq('user_id', uid).eq('role', 'admin');
+          if(error) throw error;
+          showToast('Permissão de admin removida.');
+        } else {
+          const { error } = await supabase.from('user_roles').insert({ user_id: uid, role: 'admin' });
+          if(error) throw error;
+          showToast('Usuário promovido a admin.');
+        }
+        renderAdminSection();
+      } catch(err){
+        showToast('Erro: ' + (err.message || 'falha'), true);
+        btn.disabled = false;
+      }
+    });
+  });
+  const addBtn = document.getElementById('cfg-add-role');
+  if(addBtn) addBtn.addEventListener('click', async ()=>{
+    const uid = document.getElementById('cfg-new-uid').value.trim();
+    const role = document.getElementById('cfg-new-role').value;
+    if(!uid){ showToast('Informe o ID do usuário.', true); return; }
+    addBtn.disabled = true;
+    try {
+      const { error } = await supabase.from('user_roles').insert({ user_id: uid, role });
+      if(error) throw error;
+      showToast('Perfil adicionado.');
+      document.getElementById('cfg-new-uid').value = '';
+      renderAdminSection();
+    } catch(err){
+      showToast('Erro: ' + (err.message || 'falha'), true);
+    } finally {
+      addBtn.disabled = false;
+    }
+  });
+}
+
 /* ============ SW ============ */
+
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
