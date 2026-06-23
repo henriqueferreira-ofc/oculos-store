@@ -733,8 +733,91 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
         </div>
       </div>
     </section>
+
+    <!-- PAINEL FINANCEIRO -->
+    <section id="panel-financeiro" class="hidden">
+      <h2 class="page-title">Controle Financeiro</h2>
+      <div class="fin-filter">
+        <div class="field">
+          <label>Período</label>
+          <select id="fin-period">
+            <option value="month">Mensal</option>
+            <option value="semester">Semestral</option>
+            <option value="year" selected>Anual</option>
+            <option value="all">Tudo</option>
+          </select>
+        </div>
+        <div class="field" id="fin-year-wrap">
+          <label>Ano</label>
+          <select id="fin-year"></select>
+        </div>
+        <div class="field hidden" id="fin-month-wrap">
+          <label>Mês</label>
+          <select id="fin-month">
+            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+            <option value="2">Março</option><option value="3">Abril</option>
+            <option value="4">Maio</option><option value="5">Junho</option>
+            <option value="6">Julho</option><option value="7">Agosto</option>
+            <option value="8">Setembro</option><option value="9">Outubro</option>
+            <option value="10">Novembro</option><option value="11">Dezembro</option>
+          </select>
+        </div>
+        <div class="field hidden" id="fin-semester-wrap">
+          <label>Semestre</label>
+          <select id="fin-semester">
+            <option value="1">1º semestre (Jan–Jun)</option>
+            <option value="2">2º semestre (Jul–Dez)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fin-cards" id="fin-cards"></div>
+
+      <div class="fin-table">
+        <table>
+          <thead>
+            <tr>
+              <th>OS</th><th>Cliente</th><th>Data</th><th>Status</th>
+              <th class="r">Entrada</th><th class="r">Valor Total</th>
+            </tr>
+          </thead>
+          <tbody id="fin-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PAINEL CONFIGURAÇÕES -->
+    <section id="panel-config" class="hidden">
+      <h2 class="page-title">Configurações</h2>
+
+      <div class="config-section">
+        <h3>Sua conta</h3>
+        <div class="config-row"><span class="k">Email</span><span class="v" id="cfg-email">—</span></div>
+        <div class="config-row"><span class="k">ID</span><span class="v" id="cfg-uid" style="font-family:ui-monospace,Menlo,monospace;font-size:12px"></span></div>
+        <div class="config-row"><span class="k">Perfil</span><span class="v"><span class="role-pill" id="cfg-role">usuário</span></span></div>
+        <div class="config-row"><span class="k">Sessão</span>
+          <span class="v"><button class="btn btn-ghost" id="cfg-logout" style="padding:8px 14px">Sair desta conta</button></span>
+        </div>
+      </div>
+
+      <div class="config-section" id="cfg-admin-section">
+        <h3>Administração de usuários</h3>
+        <div id="cfg-admin-content">
+          <div class="admin-only-msg">Carregando…</div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <h3>Sobre o sistema</h3>
+        <div class="config-row"><span class="k">Aplicativo</span><span class="v">Óculos Store — Gestão de OS</span></div>
+        <div class="config-row"><span class="k">Versão</span><span class="v">1.1.0</span></div>
+      </div>
+    </section>
   </main>
+    </div><!-- /.main-area -->
+  </div><!-- /.app-shell -->
 </div>
+
 
 <div id="toast"></div>
 
