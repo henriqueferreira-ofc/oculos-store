@@ -486,30 +486,34 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
 .fin-table tr:last-child td{border-bottom:none}
 .fin-table td.r,.fin-table th.r{text-align:right}
 .fin-empty{padding:30px;text-align:center;color:var(--texto-sec)}
+.fin-mobile-meta{display:none}
+@media(max-width:860px){
+  .fin-table table{table-layout:fixed;font-size:12px}
+  .fin-table th,.fin-table td{padding:10px 8px}
+  .fin-table th{font-size:10px;letter-spacing:.8px}
+  .fin-table th:nth-child(1),.fin-table td:nth-child(1){width:14%}
+  .fin-table th:nth-child(2),.fin-table td:nth-child(2){width:24%}
+  .fin-table th:nth-child(3),.fin-table td:nth-child(3){width:17%}
+  .fin-table th:nth-child(4),.fin-table td:nth-child(4){width:18%}
+  .fin-table th:nth-child(5),.fin-table td:nth-child(5){width:13%}
+  .fin-table th:nth-child(6),.fin-table td:nth-child(6){width:14%}
+  .fin-table td{vertical-align:middle;overflow-wrap:anywhere}
+  .fin-table .status-badge{white-space:nowrap;padding:5px 9px;font-size:12px}
+}
 @media(max-width:640px){
-  .fin-table{border-radius:8px;background:transparent;border:none;overflow:visible}
-  .fin-table table,.fin-table thead,.fin-table tbody,.fin-table tr,.fin-table td{display:block;width:100%}
-  .fin-table thead{display:none}
-  .fin-table tbody{display:grid;gap:12px}
-  .fin-table tr{
-    background:var(--branco);border:1px solid var(--borda);border-radius:8px;
-    padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,0.03);
-  }
-  .fin-table td{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
-    padding:8px 0;border-bottom:1px solid var(--borda);text-align:right;
-  }
-  .fin-table tr:last-child td{border-bottom:1px solid var(--borda)}
-  .fin-table td:last-child{border-bottom:none}
-  .fin-table td::before{
-    content:attr(data-label);flex:0 0 92px;text-align:left;
-    font-size:11px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1px;
-  }
-  .fin-table td.r{text-align:right}
-  .fin-table td:nth-child(2){word-break:break-word}
-  .fin-table .status-badge{white-space:nowrap}
-  .fin-table .fin-empty{display:block;text-align:center;padding:24px;border-bottom:none}
-  .fin-table .fin-empty::before{content:none}
+  .fin-table table{font-size:12px}
+  .fin-table th,.fin-table td{padding:12px 7px}
+  .fin-table th:nth-child(3),.fin-table td:nth-child(3),
+  .fin-table th:nth-child(6),.fin-table td:nth-child(6){display:none}
+  .fin-table th:nth-child(1),.fin-table td:nth-child(1){width:16%}
+  .fin-table th:nth-child(2),.fin-table td:nth-child(2){width:32%}
+  .fin-table th:nth-child(4),.fin-table td:nth-child(4){width:24%}
+  .fin-table th:nth-child(5),.fin-table td:nth-child(5){width:28%}
+  .fin-table th:nth-child(5)::after{content:" / Total"}
+  .fin-table td:nth-child(2){line-height:1.25}
+  .fin-mobile-meta{display:block;margin-top:5px;font-size:11px;color:var(--texto-sec);line-height:1.2}
+  .fin-table td.r{line-height:1.25}
+  .fin-table .status-badge{font-size:11px;padding:5px 8px}
 }
 
 /* ========== CONFIG ========== */
@@ -1373,10 +1377,10 @@ function renderFinanceiro(){
     const data = o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—';
     return `<tr>
       <td data-label="OS"><strong>${formatarOS(o.numero)}</strong></td>
-      <td data-label="Cliente">${escapeHtml(o.nome || '—')}</td>
+      <td data-label="Cliente">${escapeHtml(o.nome || '—')}<span class="fin-mobile-meta">${data}</span></td>
       <td data-label="Data">${data}</td>
       <td data-label="Status"><span class="status-badge ${statusClass(o.status)}">${statusLabel(o.status)}</span></td>
-      <td data-label="Entrada" class="r">${formatarMoeda(o.entrada)}</td>
+      <td data-label="Entrada" class="r">${formatarMoeda(o.entrada)}<span class="fin-mobile-meta">${formatarMoeda(o.valorTotal)}</span></td>
       <td data-label="Total" class="r"><strong>${formatarMoeda(o.valorTotal)}</strong></td>
     </tr>`;
   }).join('');
