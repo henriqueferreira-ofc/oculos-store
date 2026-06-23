@@ -424,6 +424,85 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .login-card h1{font-size:34px}
   .login-card .subtitle{margin-bottom:18px}
 }
+
+/* ========== SIDEBAR LAYOUT ========== */
+.app-shell{display:flex;align-items:stretch;min-height:calc(100vh - 60px);width:100%}
+.sidebar{
+  width:240px;flex-shrink:0;background:var(--branco);
+  border-right:1px solid var(--borda);
+  padding:18px 12px;display:flex;flex-direction:column;gap:2px;
+  position:sticky;top:60px;align-self:flex-start;
+  height:calc(100vh - 60px);overflow-y:auto;
+}
+.sidebar .nav-section{
+  text-transform:uppercase;letter-spacing:2px;font-size:10px;color:var(--texto-sec);
+  padding:14px 12px 6px;font-weight:600;
+}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 14px;border-radius:6px;
+  font-size:14px;color:var(--texto);text-align:left;width:100%;
+  transition:background .15s,color .15s;border:1px solid transparent;
+}
+.nav-item:hover{background:var(--creme)}
+.nav-item.active{background:var(--verde-medio);color:#fff}
+.nav-item .ico{width:18px;display:inline-flex;justify-content:center;font-size:15px}
+.main-area{flex:1;min-width:0;display:flex;flex-direction:column}
+.main-area .container{margin:0 auto}
+.hamburger{
+  display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);
+  color:#fff;padding:7px 11px;border-radius:4px;font-size:18px;line-height:1;
+}
+.sidebar-backdrop{display:none;position:fixed;inset:60px 0 0 0;background:rgba(0,0,0,0.4);z-index:44}
+.sidebar-backdrop.show{display:block}
+@media(max-width:860px){
+  .hamburger{display:inline-flex;align-items:center}
+  .sidebar{position:fixed;left:0;top:60px;z-index:45;transform:translateX(-100%);transition:transform .2s ease;box-shadow:6px 0 18px -10px rgba(0,0,0,0.2)}
+  .sidebar.open{transform:translateX(0)}
+  .app-shell{display:block}
+}
+
+/* ========== FINANCEIRO ========== */
+.fin-filter{
+  background:var(--branco);border:1px solid var(--borda);border-radius:6px;
+  padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+}
+.fin-filter .field{margin-bottom:0;min-width:150px;flex:0 1 200px}
+.fin-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:24px}
+.fin-card{
+  background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:20px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.03);
+}
+.fin-card .label{text-transform:uppercase;letter-spacing:1.5px;font-size:11px;color:var(--texto-sec);margin-bottom:8px}
+.fin-card .value{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:30px;color:var(--verde-escuro);line-height:1.1}
+.fin-card .sub{font-size:12px;color:var(--texto-sec);margin-top:6px}
+.fin-card.accent{background:linear-gradient(135deg,var(--verde-escuro),var(--verde-medio));border-color:transparent}
+.fin-card.accent .label,.fin-card.accent .sub{color:rgba(255,255,255,0.78)}
+.fin-card.accent .value{color:#fff}
+.fin-table{background:var(--branco);border:1px solid var(--borda);border-radius:8px;overflow:hidden}
+.fin-table table{width:100%;border-collapse:collapse;font-size:13px}
+.fin-table th,.fin-table td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--borda)}
+.fin-table th{background:var(--creme);font-weight:500;color:var(--texto-sec);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.fin-table tr:last-child td{border-bottom:none}
+.fin-table td.r,.fin-table th.r{text-align:right}
+.fin-empty{padding:30px;text-align:center;color:var(--texto-sec)}
+
+/* ========== CONFIG ========== */
+.config-section{background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:22px;margin-bottom:18px}
+.config-section h3{font-size:15px;margin-bottom:14px;color:var(--verde-escuro);font-weight:600;letter-spacing:.3px}
+.config-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--borda);font-size:14px}
+.config-row:last-child{border-bottom:none}
+.config-row .k{color:var(--texto-sec);font-size:12px;text-transform:uppercase;letter-spacing:1px}
+.config-row .v{font-weight:500;text-align:right;word-break:break-all}
+.role-pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:var(--verde-claro);color:#fff;text-transform:uppercase;letter-spacing:1px}
+.role-pill.admin{background:var(--verde-escuro)}
+.user-list{margin-top:10px;border:1px solid var(--borda);border-radius:6px;overflow:hidden}
+.user-list-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--borda);font-size:13px}
+.user-list-item:last-child{border-bottom:none}
+.user-list-item .uid{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--texto-sec);word-break:break-all}
+.admin-only-msg{padding:14px;background:var(--creme);border-radius:6px;color:var(--texto-sec);font-size:13px;text-align:center}
+.inline-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.inline-form input,.inline-form select{flex:1;min-width:160px;padding:10px 12px;background:var(--creme-input);border:1px solid var(--borda);border-radius:4px}
 </style>
 </head>
 <body class="login-active">
