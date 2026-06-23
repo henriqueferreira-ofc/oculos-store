@@ -1000,19 +1000,51 @@ const panels = {
   busca: document.getElementById('panel-busca'),
   form: document.getElementById('panel-form'),
   detalhe: document.getElementById('panel-detalhe'),
+  financeiro: document.getElementById('panel-financeiro'),
+  config: document.getElementById('panel-config'),
 };
 const btnBuscarTop = document.getElementById('btn-buscar');
 const btnNovaTop = document.getElementById('btn-nova');
+const sidebarEl = document.getElementById('sidebar');
+const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+const navItems = document.querySelectorAll('.nav-item[data-nav]');
+
+function setActiveNav(name){
+  navItems.forEach(el => {
+    const target = el.dataset.nav;
+    const active = (name === 'detalhe' && target === 'busca') || target === name;
+    el.classList.toggle('active', active);
+  });
+}
 function showPanel(name){
   Object.entries(panels).forEach(([k,el])=> el.classList.toggle('hidden', k !== name));
   btnBuscarTop.classList.toggle('active', name === 'busca');
   btnNovaTop.classList.toggle('active', name === 'form');
+  setActiveNav(name);
+  closeSidebar();
   window.scrollTo(0,0);
 }
+function openSidebar(){ sidebarEl.classList.add('open'); sidebarBackdrop.classList.add('show'); }
+function closeSidebar(){ sidebarEl.classList.remove('open'); sidebarBackdrop.classList.remove('show'); }
+document.getElementById('btn-hamburger').addEventListener('click', ()=>{
+  sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+});
+sidebarBackdrop.addEventListener('click', closeSidebar);
+
+navItems.forEach(el => el.addEventListener('click', ()=>{
+  const t = el.dataset.nav;
+  if(t === 'busca'){ carregarOS(); showPanel('busca'); }
+  else if(t === 'form'){ openForm(null); }
+  else if(t === 'financeiro'){ abrirFinanceiro(); }
+  else if(t === 'config'){ abrirConfig(); }
+}));
+
 btnBuscarTop.addEventListener('click', ()=>{ carregarOS(); showPanel('busca'); });
 btnNovaTop.addEventListener('click', ()=> openForm(null));
 document.getElementById('back-to-search').addEventListener('click', e=>{ e.preventDefault(); carregarOS(); showPanel('busca'); });
 document.getElementById('form-back').addEventListener('click', e=>{ e.preventDefault(); carregarOS(); showPanel('busca'); });
+
+
 
 /* ============ DATA (Cloud) ============ */
 let cacheOS = [];
