@@ -21,6 +21,7 @@ export type Database = {
           armacao: string | null
           cor: string | null
           created_at: string
+          entrada: number | null
           fone: string | null
           id: string
           lentes: string | null
@@ -44,6 +45,7 @@ export type Database = {
           armacao?: string | null
           cor?: string | null
           created_at?: string
+          entrada?: number | null
           fone?: string | null
           id?: string
           lentes?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           armacao?: string | null
           cor?: string | null
           created_at?: string
+          entrada?: number | null
           fone?: string | null
           id?: string
           lentes?: string | null
