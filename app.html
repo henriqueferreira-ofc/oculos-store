@@ -633,12 +633,16 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <div class="section-title">Dados do Cliente</div>
             <div class="grid">
               <div class="field"><label>Nome Completo *</label><input type="text" name="nome" placeholder="Nome do cliente" required /></div>
-              <div class="grid grid-3">
+              <div class="grid grid-2">
                 <div class="field"><label>Telefone</label><input type="text" name="fone" placeholder="(00) 00000-0000" /></div>
+                <div class="field"><label>Data da OS *</label><input type="date" name="data_os" required /></div>
+              </div>
+              <div class="grid grid-2">
                 <div class="field"><label>Entrada (R$)</label><input type="number" step="0.01" name="entrada" placeholder="0,00" /></div>
                 <div class="field"><label>Valor Total (R$)</label><input type="number" step="0.01" name="valorTotal" placeholder="0,00" /></div>
               </div>
             </div>
+
           </div>
 
           <div class="section">
@@ -706,8 +710,14 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <div class="sheet-title" id="det-os-num">OS-0001</div>
             <span class="status-badge" id="det-status">Aberta</span>
           </div>
-          <button class="btn btn-primary" id="btn-edit">✏️ Editar</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost hidden" id="btn-delete" style="color:#b91c1c;border-color:#fecaca">🗑️ Excluir</button>
+            <button class="btn btn-primary" id="btn-edit">✏️ Editar</button>
+          </div>
         </div>
+
+
+
 
         <div class="section">
           <div class="section-title">Dados do Cliente</div>
@@ -752,6 +762,10 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
         </div>
         <div class="valor-total-block">
           <div class="money-kv">
+            <div class="label">Data da OS</div>
+            <div class="valor" id="det-data">—</div>
+          </div>
+          <div class="money-kv">
             <div class="label">Entrada</div>
             <div class="valor" id="det-entrada">R$ 0,00</div>
           </div>
@@ -760,6 +774,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <div class="valor" id="det-valor">R$ 0,00</div>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -860,7 +875,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 const LEGACY_DB_KEY = 'otica_store_os';
-const CAMPOS = ['nome','fone','entrada','valorTotal','lentes','armacao','alt','cor',
+const CAMPOS = ['nome','fone','data_os','entrada','valorTotal','lentes','armacao','alt','cor',
   'od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp','adicao','status'];
 
 /* ============ HELPERS ============ */
@@ -875,10 +890,25 @@ function escapeHtml(str){
 }
 function statusLabel(s){ return s==='pronta' ? 'Pronta' : s==='entregue' ? 'Entregue' : 'Aberta' }
 function statusClass(s){ return s==='pronta' ? 'status-pronta' : s==='entregue' ? 'status-entregue' : 'status-aberta' }
+function hojeISO(){ const d = new Date(); const tz = d.getTimezoneOffset()*60000; return new Date(d-tz).toISOString().slice(0,10); }
+function dateInputToISO(s){
+  if(!s) return null;
+  // s = 'YYYY-MM-DD' — preserva data local fixando 12:00
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d, 12, 0, 0).toISOString();
+}
+function isoToDateInput(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 // camelCase (form) ↔ snake_case (db)
 function toDb(o){
-  return {
+  const out = {
     nome: o.nome || null,
     fone: o.fone || null,
     entrada: o.entrada === '' || o.entrada == null ? null : Number(o.entrada),
@@ -892,7 +922,11 @@ function toDb(o){
     adicao: o.adicao || null,
     status: o.status || 'aberta',
   };
+  const iso = dateInputToISO(o.data_os);
+  if(iso) out.created_at = iso;
+  return out;
 }
+
 function fromDb(r){
   return {
     id: r.id, numero: r.numero,
@@ -904,7 +938,9 @@ function fromDb(r){
     oe_esf: r.oe_esf ?? '', oe_cil: r.oe_cil ?? '', oe_eixo: r.oe_eixo ?? '', oe_dp: r.oe_dp ?? '',
     adicao: r.adicao ?? '', status: r.status ?? 'aberta',
     created_at: r.created_at ?? null,
+    data_os: isoToDateInput(r.created_at),
   };
+
 }
 
 /* ============ TOAST ============ */
@@ -950,7 +986,9 @@ function mostrarApp(){
   document.body.classList.add('app-active');
   loginScreen.classList.add('hidden');
   appEl.classList.remove('hidden');
+  carregarPerfilUsuario().catch(()=>{});
   carregarOS();
+
   verificarMigracao();
 }
 function mostrarLogin(){
@@ -1154,7 +1192,9 @@ function openForm(numero){
     formOsNum.textContent = 'Nova';
     formTitle.textContent = 'Nova Ordem de Serviço';
     form.elements.status.value = 'aberta';
+    if(form.elements.data_os) form.elements.data_os.value = hojeISO();
   }
+
   showPanel('form');
 }
 
@@ -1212,9 +1252,43 @@ function openDetalhe(numero){
   });
   document.getElementById('det-entrada').textContent = formatarMoeda(o.entrada);
   document.getElementById('det-valor').textContent = formatarMoeda(o.valorTotal);
+  document.getElementById('det-data').textContent = o.created_at
+    ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—';
   document.getElementById('btn-edit').onclick = ()=> openForm(o.numero);
+  const btnDel = document.getElementById('btn-delete');
+  if(currentUserRole === 'admin'){
+    btnDel.classList.remove('hidden');
+    btnDel.onclick = ()=> excluirOS(o);
+  } else {
+    btnDel.classList.add('hidden');
+    btnDel.onclick = null;
+  }
   showPanel('detalhe');
 }
+
+async function excluirOS(o){
+  if(currentUserRole !== 'admin'){ showToast('Apenas administradores podem excluir.', true); return; }
+  if(!currentUserData?.email){ showToast('Sessão inválida.', true); return; }
+  const senha = window.prompt(`Confirme sua senha de administrador para excluir a ${formatarOS(o.numero)} de ${o.nome || 'sem nome'}.\n\nEsta ação não pode ser desfeita.`);
+  if(senha == null) return;
+  if(!senha){ showToast('Senha obrigatória.', true); return; }
+  const btnDel = document.getElementById('btn-delete');
+  btnDel.disabled = true; const prev = btnDel.textContent; btnDel.textContent = 'Excluindo…';
+  try {
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: currentUserData.email, password: senha });
+    if(authErr) throw new Error('Senha incorreta.');
+    const { error } = await supabase.from('ordens_servico').delete().eq('id', o.id);
+    if(error) throw error;
+    showToast('OS excluída com sucesso.');
+    await carregarOS();
+    showPanel('busca');
+  } catch(err){
+    showToast('Erro: ' + (err.message || 'falha ao excluir'), true);
+  } finally {
+    btnDel.disabled = false; btnDel.textContent = prev;
+  }
+}
+
 
 /* ============ MIGRAÇÃO localStorage → Cloud ============ */
 const migBanner = document.getElementById('migration-banner');
