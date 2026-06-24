@@ -875,7 +875,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 const LEGACY_DB_KEY = 'otica_store_os';
-const CAMPOS = ['nome','fone','entrada','valorTotal','lentes','armacao','alt','cor',
+const CAMPOS = ['nome','fone','data_os','entrada','valorTotal','lentes','armacao','alt','cor',
   'od_esf','od_cil','od_eixo','od_dp','oe_esf','oe_cil','oe_eixo','oe_dp','adicao','status'];
 
 /* ============ HELPERS ============ */
@@ -890,10 +890,25 @@ function escapeHtml(str){
 }
 function statusLabel(s){ return s==='pronta' ? 'Pronta' : s==='entregue' ? 'Entregue' : 'Aberta' }
 function statusClass(s){ return s==='pronta' ? 'status-pronta' : s==='entregue' ? 'status-entregue' : 'status-aberta' }
+function hojeISO(){ const d = new Date(); const tz = d.getTimezoneOffset()*60000; return new Date(d-tz).toISOString().slice(0,10); }
+function dateInputToISO(s){
+  if(!s) return null;
+  // s = 'YYYY-MM-DD' — preserva data local fixando 12:00
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d, 12, 0, 0).toISOString();
+}
+function isoToDateInput(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 // camelCase (form) ↔ snake_case (db)
 function toDb(o){
-  return {
+  const out = {
     nome: o.nome || null,
     fone: o.fone || null,
     entrada: o.entrada === '' || o.entrada == null ? null : Number(o.entrada),
@@ -907,7 +922,11 @@ function toDb(o){
     adicao: o.adicao || null,
     status: o.status || 'aberta',
   };
+  const iso = dateInputToISO(o.data_os);
+  if(iso) out.created_at = iso;
+  return out;
 }
+
 function fromDb(r){
   return {
     id: r.id, numero: r.numero,
