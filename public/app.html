@@ -938,7 +938,9 @@ function fromDb(r){
     oe_esf: r.oe_esf ?? '', oe_cil: r.oe_cil ?? '', oe_eixo: r.oe_eixo ?? '', oe_dp: r.oe_dp ?? '',
     adicao: r.adicao ?? '', status: r.status ?? 'aberta',
     created_at: r.created_at ?? null,
+    data_os: isoToDateInput(r.created_at),
   };
+
 }
 
 /* ============ TOAST ============ */
