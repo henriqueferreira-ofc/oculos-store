@@ -1190,7 +1190,9 @@ function openForm(numero){
     formOsNum.textContent = 'Nova';
     formTitle.textContent = 'Nova Ordem de Serviço';
     form.elements.status.value = 'aberta';
+    if(form.elements.data_os) form.elements.data_os.value = hojeISO();
   }
+
   showPanel('form');
 }
 
