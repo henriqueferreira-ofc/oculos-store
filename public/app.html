@@ -710,8 +710,11 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <div class="sheet-title" id="det-os-num">OS-0001</div>
             <span class="status-badge" id="det-status">Aberta</span>
           </div>
-          <button class="btn btn-primary" id="btn-edit">✏️ Editar</button>
-        </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost hidden" id="btn-delete" style="color:#b91c1c;border-color:#fecaca">🗑️ Excluir</button>
+            <button class="btn btn-primary" id="btn-edit">✏️ Editar</button>
+          </div>
+
 
         <div class="section">
           <div class="section-title">Dados do Cliente</div>
