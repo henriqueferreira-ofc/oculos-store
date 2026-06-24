@@ -986,7 +986,9 @@ function mostrarApp(){
   document.body.classList.add('app-active');
   loginScreen.classList.add('hidden');
   appEl.classList.remove('hidden');
+  carregarPerfilUsuario().catch(()=>{});
   carregarOS();
+
   verificarMigracao();
 }
 function mostrarLogin(){
