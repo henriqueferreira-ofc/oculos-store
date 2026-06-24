@@ -1250,9 +1250,43 @@ function openDetalhe(numero){
   });
   document.getElementById('det-entrada').textContent = formatarMoeda(o.entrada);
   document.getElementById('det-valor').textContent = formatarMoeda(o.valorTotal);
+  document.getElementById('det-data').textContent = o.created_at
+    ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—';
   document.getElementById('btn-edit').onclick = ()=> openForm(o.numero);
+  const btnDel = document.getElementById('btn-delete');
+  if(currentUserRole === 'admin'){
+    btnDel.classList.remove('hidden');
+    btnDel.onclick = ()=> excluirOS(o);
+  } else {
+    btnDel.classList.add('hidden');
+    btnDel.onclick = null;
+  }
   showPanel('detalhe');
 }
+
+async function excluirOS(o){
+  if(currentUserRole !== 'admin'){ showToast('Apenas administradores podem excluir.', true); return; }
+  if(!currentUserData?.email){ showToast('Sessão inválida.', true); return; }
+  const senha = window.prompt(`Confirme sua senha de administrador para excluir a ${formatarOS(o.numero)} de ${o.nome || 'sem nome'}.\n\nEsta ação não pode ser desfeita.`);
+  if(senha == null) return;
+  if(!senha){ showToast('Senha obrigatória.', true); return; }
+  const btnDel = document.getElementById('btn-delete');
+  btnDel.disabled = true; const prev = btnDel.textContent; btnDel.textContent = 'Excluindo…';
+  try {
+    const { error: authErr } = await supabase.auth.signInWithPassword({ email: currentUserData.email, password: senha });
+    if(authErr) throw new Error('Senha incorreta.');
+    const { error } = await supabase.from('ordens_servico').delete().eq('id', o.id);
+    if(error) throw error;
+    showToast('OS excluída com sucesso.');
+    await carregarOS();
+    showPanel('busca');
+  } catch(err){
+    showToast('Erro: ' + (err.message || 'falha ao excluir'), true);
+  } finally {
+    btnDel.disabled = false; btnDel.textContent = prev;
+  }
+}
+
 
 /* ============ MIGRAÇÃO localStorage → Cloud ============ */
 const migBanner = document.getElementById('migration-banner');
