@@ -1489,11 +1489,12 @@ function popularAnos(){
   finYearSel.innerHTML = arr.map(a=> `<option value="${a}">${a}</option>`).join('');
 }
 
-function abrirFinanceiro(){
+async function abrirFinanceiro(){
   popularAnos();
   const now = new Date();
   finMonthSel.value = String(now.getMonth());
   finSemSel.value = now.getMonth() < 6 ? '1' : '2';
+  await carregarDespesas();
   renderFinanceiro();
   showPanel('financeiro');
 }
