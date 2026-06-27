@@ -532,6 +532,36 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
 .admin-only-msg{padding:14px;background:var(--creme);border-radius:6px;color:var(--texto-sec);font-size:13px;text-align:center}
 .inline-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .inline-form input,.inline-form select{flex:1;min-width:160px;padding:10px 12px;background:var(--creme-input);border:1px solid var(--borda);border-radius:4px}
+
+/* ========== DESPESAS ========== */
+.desp-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.desp-actions h3{font-size:14px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin:0}
+.desp-form{background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:18px;margin-bottom:18px}
+.desp-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.desp-form .field{margin-bottom:0}
+.desp-form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.desp-cat-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;background:var(--creme);color:var(--verde-escuro);border:1px solid var(--borda);white-space:nowrap}
+.desp-cat-pill.mercadoria{background:#e8f0ea;color:#1f4d2e;border-color:#bcd4c2}
+.desp-cat-pill.laboratorio{background:#eaf0f7;color:#1d3a66;border-color:#c2d3e8}
+.desp-cat-pill.marmitas{background:#fbeede;color:#8a4a16;border-color:#ecd0a8}
+.desp-cat-pill.produtos_diversos{background:#f3e8f3;color:#5b2864;border-color:#d8c1dd}
+.desp-tot-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.desp-tot-card{background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:14px}
+.desp-tot-card .label{font-size:10px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.desp-tot-card .value{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--verde-escuro);line-height:1.1}
+.desp-tot-card .sub{font-size:11px;color:var(--texto-sec);margin-top:4px}
+.fin-card.danger{background:linear-gradient(135deg,#7a2a2a,#a44141);border-color:transparent}
+.fin-card.danger .label,.fin-card.danger .sub{color:rgba(255,255,255,0.78)}
+.fin-card.danger .value{color:#fff}
+.fin-card.success{background:linear-gradient(135deg,#1f4d2e,#3a7a52);border-color:transparent}
+.fin-card.success .label,.fin-card.success .sub{color:rgba(255,255,255,0.82)}
+.fin-card.success .value{color:#fff}
+.desp-table td .desp-del{background:transparent;border:1px solid var(--borda);color:#a44141;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+.desp-table td .desp-del:hover{background:#fbecec;border-color:#a44141}
+@media (max-width:560px){
+  .desp-form-actions .btn{flex:1;min-width:120px}
+  .desp-tot-card .value{font-size:20px}
+}
 </style>
 </head>
 <body class="login-active">
@@ -589,6 +619,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
       <button class="nav-item" data-nav="form"><span class="ico">＋</span><span>Nova OS</span></button>
       <div class="nav-section">Gestão</div>
       <button class="nav-item" data-nav="financeiro"><span class="ico">💰</span><span>Controle Financeiro</span></button>
+      <button class="nav-item" data-nav="despesas"><span class="ico">🧾</span><span>Despesas</span></button>
       <button class="nav-item" data-nav="config"><span class="ico">⚙</span><span>Configurações</span></button>
     </aside>
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
@@ -830,6 +861,107 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
       </div>
     </section>
 
+    <!-- PAINEL DESPESAS -->
+    <section id="panel-despesas" class="hidden">
+      <h2 class="page-title">Despesas</h2>
+
+      <div class="fin-filter">
+        <div class="field">
+          <label>Período</label>
+          <select id="desp-period">
+            <option value="month">Mensal</option>
+            <option value="semester">Semestral</option>
+            <option value="year" selected>Anual</option>
+            <option value="all">Tudo</option>
+          </select>
+        </div>
+        <div class="field" id="desp-year-wrap">
+          <label>Ano</label>
+          <select id="desp-year"></select>
+        </div>
+        <div class="field hidden" id="desp-month-wrap">
+          <label>Mês</label>
+          <select id="desp-month">
+            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+            <option value="2">Março</option><option value="3">Abril</option>
+            <option value="4">Maio</option><option value="5">Junho</option>
+            <option value="6">Julho</option><option value="7">Agosto</option>
+            <option value="8">Setembro</option><option value="9">Outubro</option>
+            <option value="10">Novembro</option><option value="11">Dezembro</option>
+          </select>
+        </div>
+        <div class="field hidden" id="desp-semester-wrap">
+          <label>Semestre</label>
+          <select id="desp-semester">
+            <option value="1">1º semestre (Jan–Jun)</option>
+            <option value="2">2º semestre (Jul–Dez)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select id="desp-cat-filter">
+            <option value="">Todas</option>
+            <option value="mercadoria">Mercadoria</option>
+            <option value="laboratorio">Laboratório</option>
+            <option value="marmitas">Marmitas</option>
+            <option value="produtos_diversos">Produtos Diversos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fin-cards" id="desp-cards"></div>
+
+      <div class="desp-tot-cards" id="desp-tot-cards"></div>
+
+      <div class="desp-form" id="desp-form-wrap">
+        <div class="desp-actions">
+          <h3>Lançar nova despesa</h3>
+          <span id="desp-admin-msg" style="font-size:12px;color:var(--texto-sec)"></span>
+        </div>
+        <form id="desp-form">
+          <div class="desp-form-grid">
+            <div class="field">
+              <label for="desp-categoria">Categoria *</label>
+              <select id="desp-categoria" required>
+                <option value="mercadoria">Mercadoria</option>
+                <option value="laboratorio">Laboratório</option>
+                <option value="marmitas">Marmitas</option>
+                <option value="produtos_diversos">Produtos Diversos</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="desp-valor">Valor (R$) *</label>
+              <input type="number" id="desp-valor" step="0.01" min="0" placeholder="0,00" required />
+            </div>
+            <div class="field">
+              <label for="desp-data">Data *</label>
+              <input type="date" id="desp-data" required />
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <label for="desp-descricao">Descrição</label>
+              <input type="text" id="desp-descricao" placeholder="Ex.: Lentes multifocais — Fornecedor X" maxlength="200" />
+            </div>
+          </div>
+          <div class="desp-form-actions">
+            <button type="reset" class="btn btn-ghost">Limpar</button>
+            <button type="submit" class="btn btn-primary" id="desp-save-btn">Salvar despesa</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="fin-table desp-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th><th>Categoria</th><th>Descrição</th>
+              <th class="r">Valor</th><th class="r">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="desp-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- PAINEL CONFIGURAÇÕES -->
     <section id="panel-config" class="hidden">
       <h2 class="page-title">Configurações</h2>
@@ -1067,6 +1199,7 @@ const panels = {
   form: document.getElementById('panel-form'),
   detalhe: document.getElementById('panel-detalhe'),
   financeiro: document.getElementById('panel-financeiro'),
+  despesas: document.getElementById('panel-despesas'),
   config: document.getElementById('panel-config'),
 };
 const btnBuscarTop = document.getElementById('btn-buscar');
@@ -1102,6 +1235,7 @@ navItems.forEach(el => el.addEventListener('click', ()=>{
   if(t === 'busca'){ carregarOS(); showPanel('busca'); }
   else if(t === 'form'){ openForm(null); }
   else if(t === 'financeiro'){ abrirFinanceiro(); }
+  else if(t === 'despesas'){ abrirDespesas(); }
   else if(t === 'config'){ abrirConfig(); }
 }));
 
@@ -1355,11 +1489,12 @@ function popularAnos(){
   finYearSel.innerHTML = arr.map(a=> `<option value="${a}">${a}</option>`).join('');
 }
 
-function abrirFinanceiro(){
+async function abrirFinanceiro(){
   popularAnos();
   const now = new Date();
   finMonthSel.value = String(now.getMonth());
   finSemSel.value = now.getMonth() < 6 ? '1' : '2';
+  await carregarDespesas();
   renderFinanceiro();
   showPanel('financeiro');
 }
@@ -1401,6 +1536,16 @@ function renderFinanceiro(){
   const totalEntregue = entregues.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
   const ticket = lista.length ? totalBruto / lista.length : 0;
 
+  // Despesas no mesmo período
+  const despPeriodo = filtrarDespesasPeriodo({
+    period: finPeriod.value,
+    year: Number(finYearSel.value),
+    month: Number(finMonthSel.value),
+    semester: Number(finSemSel.value),
+  });
+  const totalDespesas = despPeriodo.reduce((s,d)=> s + (Number(d.valor)||0), 0);
+  const lucroLiquido = totalBruto - totalDespesas;
+
   let periodoLabel;
   const p = finPeriod.value;
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1414,6 +1559,16 @@ function renderFinanceiro(){
       <div class="label">Faturamento total</div>
       <div class="value">${formatarMoeda(totalBruto)}</div>
       <div class="sub">${periodoLabel} · ${lista.length} OS</div>
+    </div>
+    <div class="fin-card danger">
+      <div class="label">Despesas do período</div>
+      <div class="value">${formatarMoeda(totalDespesas)}</div>
+      <div class="sub">${despPeriodo.length} lançamento${despPeriodo.length===1?'':'s'}</div>
+    </div>
+    <div class="fin-card ${lucroLiquido>=0?'success':'danger'}">
+      <div class="label">Lucro líquido</div>
+      <div class="value">${formatarMoeda(lucroLiquido)}</div>
+      <div class="sub">Faturamento − despesas</div>
     </div>
     <div class="fin-card">
       <div class="label">Entradas recebidas</div>
@@ -1569,6 +1724,242 @@ async function renderAdminSection(){
       addBtn.disabled = false;
     }
   });
+}
+
+/* ============ DESPESAS ============ */
+const DESP_CATEGORIAS = {
+  mercadoria: 'Mercadoria',
+  laboratorio: 'Laboratório',
+  marmitas: 'Marmitas',
+  produtos_diversos: 'Produtos Diversos',
+};
+let cacheDespesas = [];
+
+const despPeriod = document.getElementById('desp-period');
+const despYearSel = document.getElementById('desp-year');
+const despMonthSel = document.getElementById('desp-month');
+const despSemSel = document.getElementById('desp-semester');
+const despCatFilter = document.getElementById('desp-cat-filter');
+const despYearWrap = document.getElementById('desp-year-wrap');
+const despMonthWrap = document.getElementById('desp-month-wrap');
+const despSemWrap = document.getElementById('desp-semester-wrap');
+const despForm = document.getElementById('desp-form');
+const despDataInput = document.getElementById('desp-data');
+const despSaveBtn = document.getElementById('desp-save-btn');
+const despFormWrap = document.getElementById('desp-form-wrap');
+const despAdminMsg = document.getElementById('desp-admin-msg');
+
+async function carregarDespesas(){
+  const { data, error } = await supabase.from('despesas').select('*').order('data_despesa', { ascending: false });
+  if(error){
+    // Sem permissão = usuário não-admin; mantemos cache vazio
+    if((error.code||'') === '42501' || /permission/i.test(error.message||'')){
+      cacheDespesas = [];
+      return;
+    }
+    showToast('Erro ao carregar despesas: ' + error.message, true);
+    cacheDespesas = [];
+    return;
+  }
+  cacheDespesas = data || [];
+}
+
+function popularAnosDespesas(){
+  const anos = new Set([new Date().getFullYear()]);
+  cacheDespesas.forEach(d => { if(d.data_despesa) anos.add(new Date(d.data_despesa+'T12:00:00').getFullYear()); });
+  cacheOS.forEach(o => { if(o.created_at) anos.add(new Date(o.created_at).getFullYear()); });
+  const arr = Array.from(anos).sort((a,b)=> b-a);
+  despYearSel.innerHTML = arr.map(a=> `<option value="${a}">${a}</option>`).join('');
+}
+
+function filtrarDespesasPeriodo({period, year, month, semester, categoria}){
+  return cacheDespesas.filter(d => {
+    if(categoria && d.categoria !== categoria) return false;
+    if(period === 'all') return true;
+    if(!d.data_despesa) return false;
+    const dt = new Date(d.data_despesa+'T12:00:00');
+    if(dt.getFullYear() !== year) return false;
+    if(period === 'month') return dt.getMonth() === month;
+    if(period === 'semester') return semester === 1 ? dt.getMonth() < 6 : dt.getMonth() >= 6;
+    return true;
+  });
+}
+
+async function abrirDespesas(){
+  await carregarPerfilUsuario();
+  if(!currentUserData){ mostrarLogin(); return; }
+  if(currentUserRole !== 'admin'){
+    despFormWrap.style.display = 'none';
+    despAdminMsg.textContent = 'Apenas administradores podem lançar despesas.';
+  } else {
+    despFormWrap.style.display = '';
+    despAdminMsg.textContent = '';
+  }
+  await carregarDespesas();
+  popularAnosDespesas();
+  const now = new Date();
+  despMonthSel.value = String(now.getMonth());
+  despSemSel.value = now.getMonth() < 6 ? '1' : '2';
+  if(!despDataInput.value) despDataInput.value = hojeISO();
+  atualizarVisFiltrosDespesas();
+  renderDespesas();
+  showPanel('despesas');
+}
+
+function atualizarVisFiltrosDespesas(){
+  const p = despPeriod.value;
+  despYearWrap.classList.toggle('hidden', p === 'all');
+  despMonthWrap.classList.toggle('hidden', p !== 'month');
+  despSemWrap.classList.toggle('hidden', p !== 'semester');
+}
+
+[despPeriod, despYearSel, despMonthSel, despSemSel, despCatFilter].forEach(el =>
+  el.addEventListener('change', ()=>{ atualizarVisFiltrosDespesas(); renderDespesas(); })
+);
+
+function renderDespesas(){
+  const filtros = {
+    period: despPeriod.value,
+    year: Number(despYearSel.value),
+    month: Number(despMonthSel.value),
+    semester: Number(despSemSel.value),
+    categoria: despCatFilter.value || null,
+  };
+  const lista = filtrarDespesasPeriodo(filtros);
+
+  // Faturamento mesmo período (para resumo)
+  let osPeriodo = cacheOS;
+  if(filtros.period !== 'all'){
+    osPeriodo = cacheOS.filter(o => {
+      if(!o.created_at) return false;
+      const d = new Date(o.created_at);
+      if(d.getFullYear() !== filtros.year) return false;
+      if(filtros.period === 'month') return d.getMonth() === filtros.month;
+      if(filtros.period === 'semester') return filtros.semester === 1 ? d.getMonth() < 6 : d.getMonth() >= 6;
+      return true;
+    });
+  }
+  const faturamento = osPeriodo.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
+  const totalDesp = lista.reduce((s,d)=> s + (Number(d.valor)||0), 0);
+  const lucro = faturamento - totalDesp;
+
+  let periodoLabel;
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  if(filtros.period === 'all') periodoLabel = 'Todos os períodos';
+  else if(filtros.period === 'month') periodoLabel = `${meses[filtros.month]} / ${filtros.year}`;
+  else if(filtros.period === 'semester') periodoLabel = `${filtros.semester}º semestre / ${filtros.year}`;
+  else periodoLabel = `Ano ${filtros.year}`;
+
+  document.getElementById('desp-cards').innerHTML = `
+    <div class="fin-card accent">
+      <div class="label">Entradas (Faturamento)</div>
+      <div class="value">${formatarMoeda(faturamento)}</div>
+      <div class="sub">${periodoLabel} · ${osPeriodo.length} OS</div>
+    </div>
+    <div class="fin-card danger">
+      <div class="label">Total de despesas</div>
+      <div class="value">${formatarMoeda(totalDesp)}</div>
+      <div class="sub">${lista.length} lançamento${lista.length===1?'':'s'}</div>
+    </div>
+    <div class="fin-card ${lucro>=0?'success':'danger'}">
+      <div class="label">Saldo após despesas</div>
+      <div class="value">${formatarMoeda(lucro)}</div>
+      <div class="sub">Faturamento − despesas</div>
+    </div>
+  `;
+
+  // Totais por categoria (sempre todas as 4 mesmo que vazias)
+  const totaisCat = Object.fromEntries(Object.keys(DESP_CATEGORIAS).map(k => [k, {total:0, count:0}]));
+  // ignorar filtro de categoria nos totais por categoria
+  const listaSemCatFiltro = filtrarDespesasPeriodo({...filtros, categoria: null});
+  listaSemCatFiltro.forEach(d => {
+    if(totaisCat[d.categoria]){
+      totaisCat[d.categoria].total += Number(d.valor)||0;
+      totaisCat[d.categoria].count += 1;
+    }
+  });
+  document.getElementById('desp-tot-cards').innerHTML = Object.entries(DESP_CATEGORIAS).map(([k,label]) => `
+    <div class="desp-tot-card">
+      <div class="label"><span>${label}</span><span class="desp-cat-pill ${k}">${totaisCat[k].count}</span></div>
+      <div class="value">${formatarMoeda(totaisCat[k].total)}</div>
+      <div class="sub">${totaisCat[k].count} lançamento${totaisCat[k].count===1?'':'s'}</div>
+    </div>
+  `).join('');
+
+  const tbody = document.getElementById('desp-tbody');
+  if(!lista.length){
+    tbody.innerHTML = `<tr><td colspan="5" class="fin-empty">Nenhuma despesa lançada no período.</td></tr>`;
+    return;
+  }
+  const ordenadas = lista.slice().sort((a,b)=> (b.data_despesa||'').localeCompare(a.data_despesa||''));
+  tbody.innerHTML = ordenadas.map(d => {
+    const data = d.data_despesa ? new Date(d.data_despesa+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+    const podeExcluir = currentUserRole === 'admin';
+    return `<tr>
+      <td data-label="Data">${data}</td>
+      <td data-label="Categoria"><span class="desp-cat-pill ${d.categoria}">${escapeHtml(DESP_CATEGORIAS[d.categoria]||d.categoria)}</span></td>
+      <td data-label="Descrição">${escapeHtml(d.descricao||'—')}</td>
+      <td data-label="Valor" class="r"><strong>${formatarMoeda(d.valor)}</strong></td>
+      <td data-label="Ações" class="r">${podeExcluir ? `<button class="desp-del" data-del="${escapeHtml(d.id)}">Excluir</button>` : '—'}</td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', ()=> excluirDespesa(btn.dataset.del));
+  });
+}
+
+despForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if(currentUserRole !== 'admin'){ showToast('Apenas administradores podem lançar despesas.', true); return; }
+  const categoria = document.getElementById('desp-categoria').value;
+  const valor = Number(document.getElementById('desp-valor').value);
+  const data_despesa = despDataInput.value;
+  const descricao = document.getElementById('desp-descricao').value.trim() || null;
+  if(!categoria || !valor || valor <= 0 || !data_despesa){
+    showToast('Preencha categoria, valor (>0) e data.', true); return;
+  }
+  despSaveBtn.disabled = true;
+  despSaveBtn.textContent = 'Salvando…';
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const uid = sessionData?.session?.user?.id || null;
+    const { error } = await supabase.from('despesas').insert({
+      categoria, valor, data_despesa, descricao, created_by: uid,
+    });
+    if(error) throw error;
+    showToast('Despesa lançada com sucesso.');
+    despForm.reset();
+    despDataInput.value = hojeISO();
+    await carregarDespesas();
+    popularAnosDespesas();
+    renderDespesas();
+  } catch(err){
+    showToast('Erro ao salvar: ' + (err.message||'falha'), true);
+  } finally {
+    despSaveBtn.disabled = false;
+    despSaveBtn.textContent = 'Salvar despesa';
+  }
+});
+
+despForm.addEventListener('reset', ()=>{
+  setTimeout(()=>{ despDataInput.value = hojeISO(); }, 0);
+});
+
+async function excluirDespesa(id){
+  if(currentUserRole !== 'admin'){ showToast('Apenas administradores.', true); return; }
+  if(!window.confirm('Excluir esta despesa? Esta ação não pode ser desfeita.')) return;
+  const senha = window.prompt('Confirme sua senha de administrador:');
+  if(!senha) return;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const email = sessionData?.session?.user?.email;
+  if(!email){ showToast('Sessão expirada.', true); mostrarLogin(); return; }
+  const { error: authErr } = await supabase.auth.signInWithPassword({ email, password: senha });
+  if(authErr){ showToast('Senha incorreta.', true); return; }
+  const { error } = await supabase.from('despesas').delete().eq('id', id);
+  if(error){ showToast('Erro: ' + error.message, true); return; }
+  showToast('Despesa excluída.');
+  await carregarDespesas();
+  renderDespesas();
 }
 
 /* ============ SW ============ */

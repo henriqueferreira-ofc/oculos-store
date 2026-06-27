@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      despesas: {
+        Row: {
+          categoria: Database["public"]["Enums"]["despesa_categoria"]
+          created_at: string
+          created_by: string | null
+          data_despesa: string
+          descricao: string | null
+          id: string
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          categoria: Database["public"]["Enums"]["despesa_categoria"]
+          created_at?: string
+          created_by?: string | null
+          data_despesa?: string
+          descricao?: string | null
+          id?: string
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["despesa_categoria"]
+          created_at?: string
+          created_by?: string | null
+          data_despesa?: string
+          descricao?: string | null
+          id?: string
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       ordens_servico: {
         Row: {
           adicao: string | null
@@ -125,6 +158,11 @@ export type Database = {
     }
     Enums: {
       app_role: "admin"
+      despesa_categoria:
+        | "mercadoria"
+        | "laboratorio"
+        | "marmitas"
+        | "produtos_diversos"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -253,6 +291,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin"],
+      despesa_categoria: [
+        "mercadoria",
+        "laboratorio",
+        "marmitas",
+        "produtos_diversos",
+      ],
     },
   },
 } as const
