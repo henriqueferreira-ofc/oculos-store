@@ -468,7 +468,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
 }
 .fin-filter .field{margin-bottom:0;min-width:150px;flex:0 1 200px}
-.fin-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:24px}
+.fin-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px}
 .fin-card{
   background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:20px;
   box-shadow:0 1px 2px rgba(0,0,0,0.03);
@@ -488,6 +488,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
 .fin-empty{padding:30px;text-align:center;color:var(--texto-sec)}
 .fin-mobile-meta{display:none}
 @media(max-width:860px){
+  .fin-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fin-table table{table-layout:fixed;font-size:12px}
   .fin-table th,.fin-table td{padding:10px 8px}
   .fin-table th{font-size:10px;letter-spacing:.8px}
@@ -501,6 +502,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
   .fin-table .status-badge{white-space:nowrap;padding:5px 9px;font-size:12px}
 }
 @media(max-width:640px){
+  .fin-cards{grid-template-columns:1fr}
   .fin-table table{font-size:12px}
   .fin-table th,.fin-table td{padding:12px 7px}
   .fin-table th:nth-child(3),.fin-table td:nth-child(3),
@@ -844,6 +846,7 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
             <option value="2">2º semestre (Jul–Dez)</option>
           </select>
         </div>
+        <button type="button" class="btn btn-primary" id="fin-pdf-btn">Gerar relatório PDF</button>
       </div>
 
       <div class="fin-cards" id="fin-cards"></div>
@@ -1534,7 +1537,6 @@ function renderFinanceiro(){
   const saldo = totalBruto - totalEntrada;
   const entregues = lista.filter(o=> o.status === 'entregue');
   const totalEntregue = entregues.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
-  const ticket = lista.length ? totalBruto / lista.length : 0;
 
   // Despesas no mesmo período
   const despPeriodo = filtrarDespesasPeriodo({
@@ -1576,19 +1578,14 @@ function renderFinanceiro(){
       <div class="sub">Sinal/pagamentos iniciais</div>
     </div>
     <div class="fin-card">
-      <div class="label">Saldo a receber</div>
-      <div class="value">${formatarMoeda(saldo)}</div>
-      <div class="sub">Valor total − entradas</div>
-    </div>
-    <div class="fin-card">
       <div class="label">OS entregues</div>
       <div class="value">${formatarMoeda(totalEntregue)}</div>
       <div class="sub">${entregues.length} de ${lista.length} OS</div>
     </div>
     <div class="fin-card">
-      <div class="label">Ticket médio</div>
-      <div class="value">${formatarMoeda(ticket)}</div>
-      <div class="sub">Por ordem de serviço</div>
+      <div class="label">Saldo a receber</div>
+      <div class="value">${formatarMoeda(saldo)}</div>
+      <div class="sub">Valor total − entradas</div>
     </div>
   `;
 
@@ -1613,6 +1610,82 @@ function renderFinanceiro(){
       <td data-label="Total" class="r"><strong>${formatarMoeda(o.valorTotal)}</strong></td>
     </tr>`;
   }).join('');
+}
+
+document.getElementById('fin-pdf-btn').addEventListener('click', gerarRelatorioFinanceiro);
+
+function gerarRelatorioFinanceiro(){
+  const lista = filtrarPorPeriodo().slice().sort((a,b) =>
+    (b.created_at ? new Date(b.created_at).getTime() : 0) -
+    (a.created_at ? new Date(a.created_at).getTime() : 0)
+  );
+  const despesas = filtrarDespesasPeriodo({
+    period: finPeriod.value,
+    year: Number(finYearSel.value),
+    month: Number(finMonthSel.value),
+    semester: Number(finSemSel.value),
+  });
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const periodo = finPeriod.value === 'all' ? 'Todos os períodos'
+    : finPeriod.value === 'month' ? `${meses[Number(finMonthSel.value)]} de ${finYearSel.value}`
+    : finPeriod.value === 'semester' ? `${finSemSel.value}º semestre de ${finYearSel.value}`
+    : `Ano de ${finYearSel.value}`;
+  const faturamento = lista.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
+  const entradas = lista.reduce((s,o)=> s + (Number(o.entrada)||0), 0);
+  const totalDespesas = despesas.reduce((s,d)=> s + (Number(d.valor)||0), 0);
+  const entregues = lista.filter(o => o.status === 'entregue');
+  const porCategoria = despesas.reduce((acc,d) => {
+    acc[d.categoria] = (acc[d.categoria] || 0) + (Number(d.valor)||0);
+    return acc;
+  }, {});
+  const janela = window.open('', '_blank');
+  if(!janela){
+    showToast('Permita pop-ups para gerar o relatório em PDF.', true);
+    return;
+  }
+  const linhasOS = lista.map(o => `
+    <tr><td>${formatarOS(o.numero)}</td><td>${escapeHtml(o.nome || '—')}</td>
+    <td>${o.created_at ? new Date(o.created_at).toLocaleDateString('pt-BR') : '—'}</td>
+    <td>${escapeHtml(statusLabel(o.status))}</td><td class="r">${formatarMoeda(o.entrada)}</td>
+    <td class="r">${formatarMoeda(o.valorTotal)}</td></tr>`).join('');
+  const linhasDespesas = despesas.slice().sort((a,b) =>
+    String(b.data_despesa || '').localeCompare(String(a.data_despesa || ''))
+  ).map(d => `
+    <tr><td>${d.data_despesa ? new Date(d.data_despesa+'T12:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+    <td>${escapeHtml(DESP_CATEGORIAS[d.categoria] || d.categoria || '—')}</td>
+    <td>${escapeHtml(d.descricao || '—')}</td><td class="r">${formatarMoeda(d.valor)}</td></tr>`).join('');
+  janela.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+    <title>Relatório financeiro — ${escapeHtml(periodo)}</title>
+    <style>
+      @page{size:A4;margin:14mm}*{box-sizing:border-box}body{font:12px Arial,sans-serif;color:#2c2c2a;margin:0}
+      header{border-bottom:2px solid #6B7C64;padding-bottom:12px;margin-bottom:18px}h1{font-size:24px;color:#4a5a44;margin:0 0 4px}
+      h2{font-size:15px;color:#4a5a44;margin:24px 0 8px}.muted{color:#777}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+      .card{border:1px solid #ddd;border-radius:5px;padding:10px}.card span{display:block;color:#777;font-size:9px;text-transform:uppercase}
+      .card strong{display:block;font-size:17px;color:#4a5a44;margin-top:4px}table{width:100%;border-collapse:collapse;font-size:10px}
+      th,td{padding:6px;border-bottom:1px solid #ddd;text-align:left}th{background:#f5f2ee;text-transform:uppercase;font-size:9px}.r{text-align:right}
+      tr{break-inside:avoid}.footer{margin-top:20px;color:#777;font-size:9px;text-align:center}
+      @media print{button{display:none}}button{margin:0 0 16px;padding:10px 16px;border:0;border-radius:4px;background:#4a5a44;color:#fff;font-weight:bold;cursor:pointer}
+    </style></head><body>
+    <button onclick="window.print()">Salvar / imprimir PDF</button>
+    <header><h1>Relatório Financeiro</h1><div>${escapeHtml(periodo)}</div>
+    <div class="muted">Gerado em ${new Date().toLocaleString('pt-BR')}</div></header>
+    <div class="cards">
+      <div class="card"><span>Faturamento</span><strong>${formatarMoeda(faturamento)}</strong></div>
+      <div class="card"><span>Despesas</span><strong>${formatarMoeda(totalDespesas)}</strong></div>
+      <div class="card"><span>Lucro líquido</span><strong>${formatarMoeda(faturamento-totalDespesas)}</strong></div>
+      <div class="card"><span>Entradas recebidas</span><strong>${formatarMoeda(entradas)}</strong></div>
+      <div class="card"><span>Saldo a receber</span><strong>${formatarMoeda(faturamento-entradas)}</strong></div>
+    </div>
+    <h2>Visão geral</h2><p>${lista.length} ordem(ns) de serviço · ${entregues.length} entregue(s) · ${despesas.length} despesa(s)</p>
+    <p>${Object.entries(DESP_CATEGORIAS).map(([k,v]) => `${v}: ${formatarMoeda(porCategoria[k] || 0)}`).join(' · ')}</p>
+    <h2>Ordens de serviço</h2><table><thead><tr><th>OS</th><th>Cliente</th><th>Data</th><th>Status</th><th class="r">Entrada</th><th class="r">Total</th></tr></thead>
+    <tbody>${linhasOS || '<tr><td colspan="6">Nenhuma ordem no período.</td></tr>'}</tbody></table>
+    <h2>Despesas</h2><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th class="r">Valor</th></tr></thead>
+    <tbody>${linhasDespesas || '<tr><td colspan="4">Nenhuma despesa no período.</td></tr>'}</tbody></table>
+    <div class="footer">Óculos Store — Controle Financeiro</div>
+    <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250))<\/script>
+    </body></html>`);
+  janela.document.close();
 }
 
 /* ============ CONFIGURAÇÕES ============ */
