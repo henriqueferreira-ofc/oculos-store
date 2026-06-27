@@ -1536,6 +1536,16 @@ function renderFinanceiro(){
   const totalEntregue = entregues.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
   const ticket = lista.length ? totalBruto / lista.length : 0;
 
+  // Despesas no mesmo período
+  const despPeriodo = filtrarDespesasPeriodo({
+    period: finPeriod.value,
+    year: Number(finYearSel.value),
+    month: Number(finMonthSel.value),
+    semester: Number(finSemSel.value),
+  });
+  const totalDespesas = despPeriodo.reduce((s,d)=> s + (Number(d.valor)||0), 0);
+  const lucroLiquido = totalBruto - totalDespesas;
+
   let periodoLabel;
   const p = finPeriod.value;
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1549,6 +1559,16 @@ function renderFinanceiro(){
       <div class="label">Faturamento total</div>
       <div class="value">${formatarMoeda(totalBruto)}</div>
       <div class="sub">${periodoLabel} · ${lista.length} OS</div>
+    </div>
+    <div class="fin-card danger">
+      <div class="label">Despesas do período</div>
+      <div class="value">${formatarMoeda(totalDespesas)}</div>
+      <div class="sub">${despPeriodo.length} lançamento${despPeriodo.length===1?'':'s'}</div>
+    </div>
+    <div class="fin-card ${lucroLiquido>=0?'success':'danger'}">
+      <div class="label">Lucro líquido</div>
+      <div class="value">${formatarMoeda(lucroLiquido)}</div>
+      <div class="sub">Faturamento − despesas</div>
     </div>
     <div class="fin-card">
       <div class="label">Entradas recebidas</div>
