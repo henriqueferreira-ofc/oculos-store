@@ -532,6 +532,36 @@ input,select{font-family:inherit;font-size:14px;color:var(--texto);outline:none}
 .admin-only-msg{padding:14px;background:var(--creme);border-radius:6px;color:var(--texto-sec);font-size:13px;text-align:center}
 .inline-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .inline-form input,.inline-form select{flex:1;min-width:160px;padding:10px 12px;background:var(--creme-input);border:1px solid var(--borda);border-radius:4px}
+
+/* ========== DESPESAS ========== */
+.desp-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.desp-actions h3{font-size:14px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin:0}
+.desp-form{background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:18px;margin-bottom:18px}
+.desp-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.desp-form .field{margin-bottom:0}
+.desp-form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+.desp-cat-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;background:var(--creme);color:var(--verde-escuro);border:1px solid var(--borda);white-space:nowrap}
+.desp-cat-pill.mercadoria{background:#e8f0ea;color:#1f4d2e;border-color:#bcd4c2}
+.desp-cat-pill.laboratorio{background:#eaf0f7;color:#1d3a66;border-color:#c2d3e8}
+.desp-cat-pill.marmitas{background:#fbeede;color:#8a4a16;border-color:#ecd0a8}
+.desp-cat-pill.produtos_diversos{background:#f3e8f3;color:#5b2864;border-color:#d8c1dd}
+.desp-tot-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.desp-tot-card{background:var(--branco);border:1px solid var(--borda);border-radius:8px;padding:14px}
+.desp-tot-card .label{font-size:10px;color:var(--texto-sec);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.desp-tot-card .value{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;color:var(--verde-escuro);line-height:1.1}
+.desp-tot-card .sub{font-size:11px;color:var(--texto-sec);margin-top:4px}
+.fin-card.danger{background:linear-gradient(135deg,#7a2a2a,#a44141);border-color:transparent}
+.fin-card.danger .label,.fin-card.danger .sub{color:rgba(255,255,255,0.78)}
+.fin-card.danger .value{color:#fff}
+.fin-card.success{background:linear-gradient(135deg,#1f4d2e,#3a7a52);border-color:transparent}
+.fin-card.success .label,.fin-card.success .sub{color:rgba(255,255,255,0.82)}
+.fin-card.success .value{color:#fff}
+.desp-table td .desp-del{background:transparent;border:1px solid var(--borda);color:#a44141;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px}
+.desp-table td .desp-del:hover{background:#fbecec;border-color:#a44141}
+@media (max-width:560px){
+  .desp-form-actions .btn{flex:1;min-width:120px}
+  .desp-tot-card .value{font-size:20px}
+}
 </style>
 </head>
 <body class="login-active">
