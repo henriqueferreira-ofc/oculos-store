@@ -1285,7 +1285,8 @@ async function carregarOS(){
     if(error.code === 'PGRST301' || (error.message||'').includes('JWT')){
       mostrarLogin(); return;
     }
-    resultsEl.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Erro ao carregar</h3><p>${escapeHtml(error.message)}</p></div>`;
+    console.error('Erro ao carregar OS:', error);
+    resultsEl.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Erro ao carregar</h3><p>Não foi possível carregar os dados. Tente novamente.</p></div>`;
     return;
   }
   cacheOS = (data||[]).map(fromDb);
