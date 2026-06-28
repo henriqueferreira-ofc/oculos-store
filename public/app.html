@@ -1389,7 +1389,8 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
     await carregarOS();
     openDetalhe(numeroFinal);
   } catch(err){
-    showToast('Erro: ' + (err.message || 'falha ao salvar'), true);
+    console.error('Erro ao salvar OS:', err);
+    showToast('Erro ao salvar. Tente novamente.', true);
   } finally {
     btn.disabled = false; btn.textContent = prev;
   }
