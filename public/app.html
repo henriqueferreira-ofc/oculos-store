@@ -1152,23 +1152,6 @@ const loginForm = document.getElementById('login-form');
 const loginErr = document.getElementById('login-error');
 const loginInfo = document.getElementById('login-info');
 const loginSubmit = document.getElementById('btn-login-submit');
-const toggleModeBtn = document.getElementById('toggle-mode');
-const modeHintText = document.getElementById('mode-hint-text');
-let signupMode = false;
-
-function setLoginMode(signup){
-  signupMode = signup;
-  loginSubmit.textContent = signup ? 'Criar conta admin' : 'Entrar';
-  toggleModeBtn.textContent = signup ? 'Voltar para login' : 'Criar conta admin';
-  modeHintText.textContent = signup ? 'Já tem conta?' : 'Primeiro acesso?';
-  loginErr.textContent = '';
-  loginInfo.classList.add('hidden');
-  if(signup){
-    loginInfo.textContent = 'Crie sua conta de administrador. Só o primeiro cadastro vira admin automaticamente.';
-    loginInfo.classList.remove('hidden');
-  }
-}
-toggleModeBtn.addEventListener('click', ()=> setLoginMode(!signupMode));
 
 function mostrarApp(){
   document.documentElement.classList.remove('login-active');
@@ -1191,7 +1174,6 @@ function mostrarLogin(){
   loginScreen.classList.remove('hidden');
   document.getElementById('senha').value = '';
   loginErr.textContent = '';
-  setLoginMode(false);
 }
 
 loginForm.addEventListener('submit', async (e)=>{
@@ -1203,30 +1185,15 @@ loginForm.addEventListener('submit', async (e)=>{
 
   loginSubmit.disabled = true;
   const originalText = loginSubmit.textContent;
-  loginSubmit.textContent = signupMode ? 'Criando…' : 'Entrando…';
+  loginSubmit.textContent = 'Entrando…';
 
   try {
-    if(signupMode){
-      const { data, error } = await supabase.auth.signUp({
-        email, password: senha,
-        options: { emailRedirectTo: window.location.origin + window.location.pathname }
-      });
-      if(error) throw error;
-      if(!data.session){
-        loginInfo.textContent = 'Conta criada. Verifique seu email para confirmar (ou tente entrar agora).';
-        loginInfo.classList.remove('hidden');
-        setLoginMode(false);
-      }
-      // se já veio sessão (auto-confirm), o onAuthStateChange leva pro app
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if(error) throw error;
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if(error) throw error;
   } catch(err){
     const msg = err?.message || 'Falha na autenticação.';
     if(msg.toLowerCase().includes('invalid login')) loginErr.textContent = 'E-mail ou senha incorretos.';
-    else if(msg.toLowerCase().includes('already')) loginErr.textContent = 'Esse e-mail já tem conta. Faça login.';
-    else if(msg.toLowerCase().includes('password')) loginErr.textContent = 'Senha inválida (mínimo 6 caracteres).';
+    else if(msg.toLowerCase().includes('password')) loginErr.textContent = 'Senha inválida.';
     else loginErr.textContent = msg;
   } finally {
     loginSubmit.disabled = false;
