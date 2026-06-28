@@ -1511,7 +1511,8 @@ let cacheVendas = [];
 async function carregarVendas(){
   const { data, error } = await supabase.from('vendas').select('*').order('data_venda', { ascending:false }).order('created_at', { ascending:false });
   if(error){
-    showToast('Erro ao carregar vendas: ' + error.message, true);
+    console.error('Erro ao carregar vendas:', error);
+    showToast('Erro ao carregar vendas. Tente novamente.', true);
     return false;
   }
   cacheVendas = data || [];
