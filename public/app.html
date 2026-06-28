@@ -1952,7 +1952,8 @@ async function renderAdminSection(){
       document.getElementById('cfg-new-uid').value = '';
       renderAdminSection();
     } catch(err){
-      showToast('Erro: ' + (err.message || 'falha'), true);
+      console.error('Erro ao adicionar perfil:', err);
+      showToast('Não foi possível adicionar o perfil.', true);
     } finally {
       addBtn.disabled = false;
     }
