@@ -2183,7 +2183,8 @@ despForm.addEventListener('submit', async (e)=>{
     popularAnosDespesas();
     renderDespesas();
   } catch(err){
-    showToast('Erro ao salvar: ' + (err.message||'falha'), true);
+    console.error('Erro ao salvar despesa:', err);
+    showToast('Erro ao salvar. Tente novamente.', true);
   } finally {
     despSaveBtn.disabled = false;
     despSaveBtn.textContent = 'Salvar despesa';
