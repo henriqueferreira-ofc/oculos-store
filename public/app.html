@@ -1597,7 +1597,7 @@ function renderVendas(){
     if(!confirm('Excluir esta venda? O valor também será removido das entradas.')) return;
     btn.disabled = true;
     const { error } = await supabase.from('vendas').delete().eq('id', btn.dataset.vendaDel);
-    if(error){ showToast('Erro ao excluir: ' + error.message, true); btn.disabled = false; return; }
+    if(error){ console.error('Erro ao excluir venda:', error); showToast('Erro ao excluir. Tente novamente.', true); btn.disabled = false; return; }
     cacheVendas = cacheVendas.filter(v => v.id !== btn.dataset.vendaDel);
     renderVendas();
     showToast('Venda excluída das entradas.');
