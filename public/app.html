@@ -2206,7 +2206,7 @@ async function excluirDespesa(id){
   const { error: authErr } = await supabase.auth.signInWithPassword({ email, password: senha });
   if(authErr){ showToast('Senha incorreta.', true); return; }
   const { error } = await supabase.from('despesas').delete().eq('id', id);
-  if(error){ showToast('Erro: ' + error.message, true); return; }
+  if(error){ console.error('Erro ao excluir despesa:', error); showToast('Erro ao excluir. Tente novamente.', true); return; }
   showToast('Despesa excluída.');
   await carregarDespesas();
   renderDespesas();
