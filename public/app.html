@@ -1886,7 +1886,8 @@ async function renderAdminSection(){
   box.innerHTML = `<div class="admin-only-msg">Carregando usuários…</div>`;
   const { data: roles, error } = await supabase.from('user_roles').select('user_id, role, created_at').order('created_at', { ascending: true });
   if(error){
-    box.innerHTML = `<div class="admin-only-msg">Erro: ${escapeHtml(error.message)}</div>`;
+    console.error('Erro ao carregar perfis:', error);
+    box.innerHTML = `<div class="admin-only-msg">Erro ao carregar perfis. Tente novamente.</div>`;
     return;
   }
   const grouped = {};
