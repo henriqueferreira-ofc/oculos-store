@@ -1487,7 +1487,7 @@ btnMigDo.addEventListener('click', async ()=>{
   const errors = [];
   for(const o of legacy){
     const { error } = await supabase.from('ordens_servico').insert(toDb(o));
-    if(error) errors.push(error.message || 'erro desconhecido');
+    if(error){ console.error('Falha na migração:', error); errors.push('erro'); }
     else ok++;
   }
   await carregarOS();
@@ -1498,7 +1498,7 @@ btnMigDo.addEventListener('click', async ()=>{
   } else {
     localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
     migBanner.classList.remove('hidden');
-    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam. ${errors[0]}`, true);
+    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam.`, true);
   }
   btnMigDo.disabled = false; btnMigSkip.disabled = false;
   btnMigDo.textContent = 'Migrar agora';
