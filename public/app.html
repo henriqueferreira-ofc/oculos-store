@@ -1933,7 +1933,8 @@ async function renderAdminSection(){
         }
         renderAdminSection();
       } catch(err){
-        showToast('Erro: ' + (err.message || 'falha'), true);
+        console.error('Erro ao alterar perfil:', err);
+        showToast('Não foi possível concluir a operação.', true);
         btn.disabled = false;
       }
     });
