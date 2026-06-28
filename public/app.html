@@ -1447,7 +1447,8 @@ async function excluirOS(o){
     await carregarOS();
     showPanel('busca');
   } catch(err){
-    showToast('Erro: ' + (err.message || 'falha ao excluir'), true);
+    console.error('Erro ao excluir OS:', err);
+    showToast('Erro ao excluir. Tente novamente.', true);
   } finally {
     btnDel.disabled = false; btnDel.textContent = prev;
   }
