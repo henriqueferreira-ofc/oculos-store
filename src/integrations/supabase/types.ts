@@ -143,6 +143,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vendas: {
+        Row: {
+          cliente: string
+          created_at: string
+          created_by: string | null
+          data_venda: string
+          forma_pagamento: string | null
+          id: string
+          observacoes: string | null
+          produto: string
+          tipo: Database["public"]["Enums"]["venda_tipo"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cliente: string
+          created_at?: string
+          created_by?: string | null
+          data_venda?: string
+          forma_pagamento?: string | null
+          id?: string
+          observacoes?: string | null
+          produto: string
+          tipo: Database["public"]["Enums"]["venda_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          created_by?: string | null
+          data_venda?: string
+          forma_pagamento?: string | null
+          id?: string
+          observacoes?: string | null
+          produto?: string
+          tipo?: Database["public"]["Enums"]["venda_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -163,6 +205,7 @@ export type Database = {
         | "laboratorio"
         | "marmitas"
         | "produtos_diversos"
+      venda_tipo: "grau" | "sol"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -297,6 +340,7 @@ export const Constants = {
         "marmitas",
         "produtos_diversos",
       ],
+      venda_tipo: ["grau", "sol"],
     },
   },
 } as const
