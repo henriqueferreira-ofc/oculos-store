@@ -1285,7 +1285,8 @@ async function carregarOS(){
     if(error.code === 'PGRST301' || (error.message||'').includes('JWT')){
       mostrarLogin(); return;
     }
-    resultsEl.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Erro ao carregar</h3><p>${escapeHtml(error.message)}</p></div>`;
+    console.error('Erro ao carregar OS:', error);
+    resultsEl.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Erro ao carregar</h3><p>Não foi possível carregar os dados. Tente novamente.</p></div>`;
     return;
   }
   cacheOS = (data||[]).map(fromDb);
@@ -1388,7 +1389,8 @@ document.getElementById('btn-save').addEventListener('click', async ()=>{
     await carregarOS();
     openDetalhe(numeroFinal);
   } catch(err){
-    showToast('Erro: ' + (err.message || 'falha ao salvar'), true);
+    console.error('Erro ao salvar OS:', err);
+    showToast('Erro ao salvar. Tente novamente.', true);
   } finally {
     btn.disabled = false; btn.textContent = prev;
   }
@@ -1445,7 +1447,8 @@ async function excluirOS(o){
     await carregarOS();
     showPanel('busca');
   } catch(err){
-    showToast('Erro: ' + (err.message || 'falha ao excluir'), true);
+    console.error('Erro ao excluir OS:', err);
+    showToast('Erro ao excluir. Tente novamente.', true);
   } finally {
     btnDel.disabled = false; btnDel.textContent = prev;
   }
@@ -1484,7 +1487,7 @@ btnMigDo.addEventListener('click', async ()=>{
   const errors = [];
   for(const o of legacy){
     const { error } = await supabase.from('ordens_servico').insert(toDb(o));
-    if(error) errors.push(error.message || 'erro desconhecido');
+    if(error){ console.error('Falha na migração:', error); errors.push('erro'); }
     else ok++;
   }
   await carregarOS();
@@ -1495,7 +1498,7 @@ btnMigDo.addEventListener('click', async ()=>{
   } else {
     localStorage.removeItem(LEGACY_DB_KEY + '_migrated');
     migBanner.classList.remove('hidden');
-    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam. ${errors[0]}`, true);
+    showToast(`Migração falhou: ${ok} OK, ${errors.length} falharam.`, true);
   }
   btnMigDo.disabled = false; btnMigSkip.disabled = false;
   btnMigDo.textContent = 'Migrar agora';
@@ -1508,7 +1511,8 @@ let cacheVendas = [];
 async function carregarVendas(){
   const { data, error } = await supabase.from('vendas').select('*').order('data_venda', { ascending:false }).order('created_at', { ascending:false });
   if(error){
-    showToast('Erro ao carregar vendas: ' + error.message, true);
+    console.error('Erro ao carregar vendas:', error);
+    showToast('Erro ao carregar vendas. Tente novamente.', true);
     return false;
   }
   cacheVendas = data || [];
@@ -1566,7 +1570,8 @@ document.getElementById('venda-form').addEventListener('submit', async e => {
     await carregarVendas();
     renderVendas();
   } catch(err){
-    showToast('Erro ao salvar venda: ' + (err.message || 'falha'), true);
+    console.error('Erro ao salvar venda:', err);
+    showToast('Erro ao salvar venda. Tente novamente.', true);
   } finally {
     btn.disabled = false;
     btn.textContent = '💾 Salvar venda';
@@ -1592,7 +1597,7 @@ function renderVendas(){
     if(!confirm('Excluir esta venda? O valor também será removido das entradas.')) return;
     btn.disabled = true;
     const { error } = await supabase.from('vendas').delete().eq('id', btn.dataset.vendaDel);
-    if(error){ showToast('Erro ao excluir: ' + error.message, true); btn.disabled = false; return; }
+    if(error){ console.error('Erro ao excluir venda:', error); showToast('Erro ao excluir. Tente novamente.', true); btn.disabled = false; return; }
     cacheVendas = cacheVendas.filter(v => v.id !== btn.dataset.vendaDel);
     renderVendas();
     showToast('Venda excluída das entradas.');
@@ -1881,7 +1886,8 @@ async function renderAdminSection(){
   box.innerHTML = `<div class="admin-only-msg">Carregando usuários…</div>`;
   const { data: roles, error } = await supabase.from('user_roles').select('user_id, role, created_at').order('created_at', { ascending: true });
   if(error){
-    box.innerHTML = `<div class="admin-only-msg">Erro: ${escapeHtml(error.message)}</div>`;
+    console.error('Erro ao carregar perfis:', error);
+    box.innerHTML = `<div class="admin-only-msg">Erro ao carregar perfis. Tente novamente.</div>`;
     return;
   }
   const grouped = {};
@@ -1927,7 +1933,8 @@ async function renderAdminSection(){
         }
         renderAdminSection();
       } catch(err){
-        showToast('Erro: ' + (err.message || 'falha'), true);
+        console.error('Erro ao alterar perfil:', err);
+        showToast('Não foi possível concluir a operação.', true);
         btn.disabled = false;
       }
     });
@@ -1945,7 +1952,8 @@ async function renderAdminSection(){
       document.getElementById('cfg-new-uid').value = '';
       renderAdminSection();
     } catch(err){
-      showToast('Erro: ' + (err.message || 'falha'), true);
+      console.error('Erro ao adicionar perfil:', err);
+      showToast('Não foi possível adicionar o perfil.', true);
     } finally {
       addBtn.disabled = false;
     }
@@ -1983,7 +1991,8 @@ async function carregarDespesas(){
       cacheDespesas = [];
       return;
     }
-    showToast('Erro ao carregar despesas: ' + error.message, true);
+    console.error('Erro ao carregar despesas:', error);
+    showToast('Erro ao carregar despesas. Tente novamente.', true);
     cacheDespesas = [];
     return;
   }
@@ -2174,7 +2183,8 @@ despForm.addEventListener('submit', async (e)=>{
     popularAnosDespesas();
     renderDespesas();
   } catch(err){
-    showToast('Erro ao salvar: ' + (err.message||'falha'), true);
+    console.error('Erro ao salvar despesa:', err);
+    showToast('Erro ao salvar. Tente novamente.', true);
   } finally {
     despSaveBtn.disabled = false;
     despSaveBtn.textContent = 'Salvar despesa';
@@ -2196,7 +2206,7 @@ async function excluirDespesa(id){
   const { error: authErr } = await supabase.auth.signInWithPassword({ email, password: senha });
   if(authErr){ showToast('Senha incorreta.', true); return; }
   const { error } = await supabase.from('despesas').delete().eq('id', id);
-  if(error){ showToast('Erro: ' + error.message, true); return; }
+  if(error){ console.error('Erro ao excluir despesa:', error); showToast('Erro ao excluir. Tente novamente.', true); return; }
   showToast('Despesa excluída.');
   await carregarDespesas();
   renderDespesas();
