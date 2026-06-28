@@ -1991,7 +1991,8 @@ async function carregarDespesas(){
       cacheDespesas = [];
       return;
     }
-    showToast('Erro ao carregar despesas: ' + error.message, true);
+    console.error('Erro ao carregar despesas:', error);
+    showToast('Erro ao carregar despesas. Tente novamente.', true);
     cacheDespesas = [];
     return;
   }
