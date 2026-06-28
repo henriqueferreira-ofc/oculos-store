@@ -1570,7 +1570,8 @@ document.getElementById('venda-form').addEventListener('submit', async e => {
     await carregarVendas();
     renderVendas();
   } catch(err){
-    showToast('Erro ao salvar venda: ' + (err.message || 'falha'), true);
+    console.error('Erro ao salvar venda:', err);
+    showToast('Erro ao salvar venda. Tente novamente.', true);
   } finally {
     btn.disabled = false;
     btn.textContent = '💾 Salvar venda';
