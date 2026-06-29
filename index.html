@@ -1682,7 +1682,7 @@ function renderFinanceiro(){
   const totalEntradaOS = lista.reduce((s,o)=> s + (Number(o.entrada)||0), 0);
   const totalBruto = totalBrutoOS + totalVendas;
   const totalEntrada = totalEntradaOS + totalVendas;
-  const saldo = totalBrutoOS - totalEntradaOS;
+  const saldo = (totalBrutoOS - totalEntradaOS) + totalVendas;
   const entregues = lista.filter(o=> o.status === 'entregue');
   const totalEntregue = entregues.reduce((s,o)=> s + (Number(o.valorTotal)||0), 0);
 
@@ -1733,7 +1733,7 @@ function renderFinanceiro(){
     <div class="fin-card">
       <div class="label">Saldo a receber</div>
       <div class="value">${formatarMoeda(saldo)}</div>
-      <div class="sub">Saldo pendente somente de OS</div>
+      <div class="sub">OS pendentes + vendas avulsas</div>
     </div>
   `;
 
